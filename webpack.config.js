@@ -1,5 +1,5 @@
 var path = require("path");
-var CleanWebpackPlugin = require("clean-webpack-plugin");
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var distPath = path.resolve(__dirname, "dist");
 var rootPath = path.resolve(__dirname, ".");
@@ -8,12 +8,14 @@ module.exports = {
     target: "web",
     devtool: "inline-source-map",
     devServer: {
-        contentBase: rootPath,
+        static: {
+            directory: rootPath
+        },
         https: true,
         port: 6221
     },
     plugins: [
-        new CleanWebpackPlugin.CleanWebpackPlugin(),
+        new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
             chunks: ["extension"],
             filename: "extension.html",
@@ -66,7 +68,20 @@ module.exports = {
             },
             {
                 test: /\.scss$/,
-                use: ["style-loader", "css-loader", "azure-devops-ui/buildScripts/css-variables-loader", "sass-loader"]
+                use: [
+                    "style-loader",
+                    "css-loader",
+                    "azure-devops-ui/buildScripts/css-variables-loader",
+                    {
+                        loader: "sass-loader",
+                        options: {
+                            implementation: require("sass"),
+                            sassOptions: {
+                                silenceDeprecations: ['legacy-js-api']
+                            }
+                        }
+                    }
+                ]
             },
             {
                 test: /\.css$/,
