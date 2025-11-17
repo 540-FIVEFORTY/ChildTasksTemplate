@@ -16,7 +16,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,json,css,scss}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,json,css,scss}\"",
     "type-check": "tsc --noEmit",
-    "package": "npm run build && tfx extension create --output-path ./bin --manifest-globs vss-extension.json",
+    "package": "npm run build && cp -r doc dist/ && tfx extension create --output-path ./bin --manifest-globs vss-extension.json",
     "publish": "npm run build && tfx extension publish --output-path ./bin --manifest-globs vss-extension.json",
     "clean": "rimraf dist bin coverage",
     "prepare": "husky install"
