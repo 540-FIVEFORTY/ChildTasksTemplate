@@ -19,9 +19,9 @@ export default defineConfig({
 
     rollupOptions: {
       input: {
-        extension: resolve(__dirname, 'src/extension/index.html'),
-        settings: resolve(__dirname, 'src/settings/index.html'),
-        chooseTemplate: resolve(__dirname, 'src/chooseTemplatePanel/index.html'),
+        extension: resolve(__dirname, 'src-modern/extension/index.html'),
+        settings: resolve(__dirname, 'src-modern/settings/index.html'),
+        chooseTemplate: resolve(__dirname, 'src-modern/chooseTemplate/index.html'),
       },
 
       output: {
@@ -71,11 +71,11 @@ export default defineConfig({
 
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src'),
-      '@core': resolve(__dirname, 'src/core'),
-      '@features': resolve(__dirname, 'src/features'),
-      '@shared': resolve(__dirname, 'src/shared'),
-      '@config': resolve(__dirname, 'src/config'),
+      '@': resolve(__dirname, 'src-modern'),
+      '@core': resolve(__dirname, 'src-modern/core'),
+      '@features': resolve(__dirname, 'src-modern/features'),
+      '@shared': resolve(__dirname, 'src-modern/shared'),
+      '@config': resolve(__dirname, 'src-modern/config'),
     },
   },
 

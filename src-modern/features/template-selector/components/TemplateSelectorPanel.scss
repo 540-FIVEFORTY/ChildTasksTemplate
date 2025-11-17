@@ -1,0 +1,62 @@
+.template-selector-panel {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  &--loading,
+  &--error,
+  &--empty {
+    justify-content: center;
+    align-items: center;
+  }
+
+  &__header {
+    margin-bottom: 20px;
+  }
+
+  &__title {
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  &__subtitle {
+    margin: 0;
+    color: var(--text-secondary-color, #666);
+    font-size: 14px;
+  }
+
+  &__content {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 20px;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color, #e0e0e0);
+  }
+}
+
+.button-bar {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.rotating {
+  animation: rotate 1s linear infinite;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
