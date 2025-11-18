@@ -85,22 +85,22 @@
 	],
 	"links": {
 		"support": {
-			"uri": "mailto:jpiquot@fiveforty.fr"
+			"uri": "mailto:dbru@fiveforty.fr"
 		},
 		"home": {
-			"uri": "https://github.com/jpiquot/ChildTasksTemplate"
+			"uri": "https://github.com/dbru540/ChildTasksTemplate"
 		},
 		"getstarted": {
-			"uri": "https://github.com/jpiquot/ChildTasksTemplate"
+			"uri": "https://github.com/dbru540/ChildTasksTemplate"
 		},
 		"learn": {
-			"uri": "https://github.com/jpiquot/ChildTasksTemplate"
+			"uri": "https://github.com/dbru540/ChildTasksTemplate"
 		},
 		"repository": {
-			"uri": "https://github.com/jpiquot/ChildTasksTemplate"
+			"uri": "https://github.com/dbru540/ChildTasksTemplate"
 		},
 		"issues": {
-			"uri": "https://github.com/jpiquot/ChildTasksTemplate/issues"
+			"uri": "https://github.com/dbru540/ChildTasksTemplate/issues"
 		}
 	},
 	"tags": [
@@ -110,7 +110,7 @@
 	],
 	"repository": {
 		"type": "git",
-		"uri": "https://github.com/jpiquot/ChildTasksTemplate.git"
+		"uri": "https://github.com/dbru540/ChildTasksTemplate.git"
 	},
 	"screenshots": [
 		{

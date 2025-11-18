@@ -365,9 +365,9 @@ See [LICENSE](LICENSE) file for details.
 ## 🔗 Links
 
 - **Marketplace**: [Child Tasks Template](https://marketplace.visualstudio.com/items?itemName=Fiveforty.ChildTasksTemplate)
-- **Repository**: [GitHub](https://github.com/jpiquot/ChildTasksTemplate)
-- **Issues**: [Report Issues](https://github.com/jpiquot/ChildTasksTemplate/issues)
-- **Support**: jpiquot@fiveforty.fr
+- **Repository**: [GitHub](https://github.com/dbru540/ChildTasksTemplate)
+- **Issues**: [Report Issues](https://github.com/dbru540/ChildTasksTemplate/issues)
+- **Support**: dbru@fiveforty.fr
 
 ## 🙏 Acknowledgments
 
