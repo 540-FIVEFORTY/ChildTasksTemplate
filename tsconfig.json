@@ -31,5 +31,6 @@
     }
   },
   "include": ["src-modern"],
+  "exclude": ["src-modern/**/*.test.ts", "src-modern/**/*.spec.ts", "src-modern/test"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
