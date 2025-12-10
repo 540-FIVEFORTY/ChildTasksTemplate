@@ -11,7 +11,7 @@ export default defineConfig({
     globals: true,
 
     // Setup
-    setupFiles: ['./src/test/setup.ts'],
+    setupFiles: ['./src-modern/test/setup.ts'],
 
     // Coverage
     coverage: {
@@ -50,12 +50,12 @@ export default defineConfig({
 
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src'),
-      '@core': resolve(__dirname, 'src/core'),
-      '@features': resolve(__dirname, 'src/features'),
-      '@shared': resolve(__dirname, 'src/shared'),
-      '@config': resolve(__dirname, 'src/config'),
-      '@test': resolve(__dirname, 'src/test'),
+      '@': resolve(__dirname, 'src-modern'),
+      '@core': resolve(__dirname, 'src-modern/core'),
+      '@features': resolve(__dirname, 'src-modern/features'),
+      '@shared': resolve(__dirname, 'src-modern/shared'),
+      '@config': resolve(__dirname, 'src-modern/config'),
+      '@test': resolve(__dirname, 'src-modern/test'),
     },
   },
 });
