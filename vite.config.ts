@@ -11,6 +11,9 @@ export default defineConfig({
     }),
   ],
 
+  // Use relative paths for Azure DevOps extension compatibility
+  base: './',
+
   build: {
     outDir: 'dist',
     sourcemap: true,
@@ -25,11 +28,12 @@ export default defineConfig({
       },
 
       output: {
-        // Noms de fichiers pour les entry points
+        // Bundle everything into single files (no code splitting)
+        // Azure DevOps iframes have issues with ES module imports
         entryFileNames: '[name].js',
 
-        // Chunks avec hash pour cache busting
-        chunkFileNames: 'chunks/[name]-[hash].js',
+        // Inline all chunks - no separate chunk files
+        inlineDynamicImports: false,
 
         // Assets avec hash
         assetFileNames: (assetInfo) => {
@@ -42,23 +46,6 @@ export default defineConfig({
           }
           // Autres assets
           return 'assets/[name]-[hash][extname]';
-        },
-
-        // Optimisation des chunks
-        manualChunks: (id) => {
-          // Vendor chunks
-          if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom')) {
-              return 'vendor-react';
-            }
-            if (id.includes('azure-devops')) {
-              return 'vendor-azure';
-            }
-            if (id.includes('@tanstack') || id.includes('zustand')) {
-              return 'vendor-state';
-            }
-            return 'vendor';
-          }
         },
       },
     },

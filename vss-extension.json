@@ -3,7 +3,7 @@
 	"id": "ChildTasksTemplate",
 	"version": "3.0.0",
 	"name": "Child Tasks Template",
-	"public": true,
+	"public": false,
 	"publisher": "Fiveforty",
 	"description": "This extension enables creating user story or bug child tasks from a template.",
 	"targets": [
