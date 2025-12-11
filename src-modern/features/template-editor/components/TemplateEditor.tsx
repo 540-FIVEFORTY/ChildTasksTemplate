@@ -13,6 +13,18 @@ import type { TemplateSetup } from '@core/models';
 
 import './TemplateEditor.scss';
 
+// All possible work item types that can be created as children across different processes
+// The actual valid types depend on parent type and process, but we show all options in settings
+const ALL_WORK_ITEM_TYPES = [
+  'Task',
+  'Bug',
+  'User Story',        // Agile
+  'Product Backlog Item', // Scrum
+  'Requirement',       // CMMI
+  'Feature',
+  'Issue',             // Basic
+];
+
 interface TemplateEditorProps {
   initialData: TemplateSetup | null;
   isLoading: boolean;
@@ -38,6 +50,7 @@ export function TemplateEditor({
     addTask,
     removeTask,
     updateTaskName,
+    updateTaskWorkItemType,
     addField,
     removeField,
     updateFieldName,
@@ -111,12 +124,16 @@ export function TemplateEditor({
           <TemplateItem
             key={templateIndex}
             template={template}
+            availableWorkItemTypes={ALL_WORK_ITEM_TYPES}
             onUpdateName={(name) => updateTemplateName(templateIndex, name)}
             onRemove={() => removeTemplate(templateIndex)}
             onAddTask={() => addTask(templateIndex)}
             onRemoveTask={(taskIndex) => removeTask(templateIndex, taskIndex)}
             onUpdateTaskName={(taskIndex, name) =>
               updateTaskName(templateIndex, taskIndex, name)
+            }
+            onUpdateTaskWorkItemType={(taskIndex, type) =>
+              updateTaskWorkItemType(templateIndex, taskIndex, type)
             }
             onAddField={(taskIndex) => addField(templateIndex, taskIndex)}
             onRemoveField={(taskIndex, fieldIndex) =>

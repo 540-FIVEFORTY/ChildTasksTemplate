@@ -45,6 +45,7 @@ interface TemplateEditorState {
   addTask: (templateIndex: number) => void;
   removeTask: (templateIndex: number, taskIndex: number) => void;
   updateTaskName: (templateIndex: number, taskIndex: number, name: string) => void;
+  updateTaskWorkItemType: (templateIndex: number, taskIndex: number, workItemType: string) => void;
 
   // Actions - Fields
   addField: (templateIndex: number, taskIndex: number) => void;
@@ -264,6 +265,13 @@ export const useTemplateEditorStore = create<TemplateEditorState>()(
         set((state) => {
           if (!state.templateSetup) return;
           state.templateSetup.templates[templateIndex].tasks[taskIndex].name = name;
+          state.isDirty = true;
+        }),
+
+      updateTaskWorkItemType: (templateIndex, taskIndex, workItemType) =>
+        set((state) => {
+          if (!state.templateSetup) return;
+          state.templateSetup.templates[templateIndex].tasks[taskIndex].workItemType = workItemType;
           state.isDirty = true;
         }),
 

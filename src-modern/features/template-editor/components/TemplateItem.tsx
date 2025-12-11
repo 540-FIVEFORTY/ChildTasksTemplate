@@ -10,11 +10,13 @@ import { TaskItem } from './TaskItem';
 
 interface TemplateItemProps {
   template: Template;
+  availableWorkItemTypes: string[];
   onUpdateName: (name: string) => void;
   onRemove: () => void;
   onAddTask: () => void;
   onRemoveTask: (taskIndex: number) => void;
   onUpdateTaskName: (taskIndex: number, name: string) => void;
+  onUpdateTaskWorkItemType: (taskIndex: number, workItemType: string) => void;
   onAddField: (taskIndex: number) => void;
   onRemoveField: (taskIndex: number, fieldIndex: number) => void;
   onUpdateFieldName: (taskIndex: number, fieldIndex: number, name: string) => void;
@@ -24,11 +26,13 @@ interface TemplateItemProps {
 
 export function TemplateItem({
   template,
+  availableWorkItemTypes,
   onUpdateName,
   onRemove,
   onAddTask,
   onRemoveTask,
   onUpdateTaskName,
+  onUpdateTaskWorkItemType,
   onAddField,
   onRemoveField,
   onUpdateFieldName,
@@ -71,7 +75,9 @@ export function TemplateItem({
                 key={taskIndex}
                 task={task}
                 taskIndex={taskIndex}
+                availableWorkItemTypes={availableWorkItemTypes}
                 onUpdateName={(name) => onUpdateTaskName(taskIndex, name)}
+                onUpdateWorkItemType={(type) => onUpdateTaskWorkItemType(taskIndex, type)}
                 onRemove={() => onRemoveTask(taskIndex)}
                 onAddField={() => onAddField(taskIndex)}
                 onRemoveField={(fieldIndex) => onRemoveField(taskIndex, fieldIndex)}

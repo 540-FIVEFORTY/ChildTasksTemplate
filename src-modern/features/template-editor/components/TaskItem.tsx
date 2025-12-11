@@ -3,13 +3,19 @@
  */
 import { TextField } from 'azure-devops-ui/TextField';
 import { Button } from 'azure-devops-ui/Button';
+import { Dropdown } from 'azure-devops-ui/Dropdown';
+import { DropdownSelection } from 'azure-devops-ui/Utilities/DropdownSelection';
+import type { IListBoxItem } from 'azure-devops-ui/ListBox';
+import { useMemo } from 'react';
 import type { Task, FieldType } from '@core/models';
 import { FieldItem } from './FieldItem';
 
 interface TaskItemProps {
   task: Task;
   taskIndex: number;
+  availableWorkItemTypes: string[];
   onUpdateName: (name: string) => void;
+  onUpdateWorkItemType: (workItemType: string) => void;
   onRemove: () => void;
   onAddField: () => void;
   onRemoveField: (fieldIndex: number) => void;
@@ -21,7 +27,9 @@ interface TaskItemProps {
 export function TaskItem({
   task,
   taskIndex,
+  availableWorkItemTypes,
   onUpdateName,
+  onUpdateWorkItemType,
   onRemove,
   onAddField,
   onRemoveField,
@@ -29,6 +37,34 @@ export function TaskItem({
   onUpdateFieldValue,
   onUpdateFieldType,
 }: TaskItemProps) {
+  // Create dropdown items from available work item types
+  const workItemTypeItems: IListBoxItem[] = useMemo(
+    () =>
+      availableWorkItemTypes.map((type) => ({
+        id: type,
+        text: type,
+      })),
+    [availableWorkItemTypes]
+  );
+
+  // Create selection object for dropdown
+  const workItemTypeSelection = useMemo(() => {
+    const selection = new DropdownSelection();
+    const currentType = task.workItemType || 'Task';
+    const index = availableWorkItemTypes.indexOf(currentType);
+    if (index >= 0) {
+      selection.select(index);
+    }
+    return selection;
+  }, [task.workItemType, availableWorkItemTypes]);
+
+  const handleWorkItemTypeSelect = (
+    _event: React.SyntheticEvent<HTMLElement>,
+    item: IListBoxItem<{}>
+  ) => {
+    onUpdateWorkItemType(item.id as string);
+  };
+
   return (
     <div className="task-item">
       <div className="task-item__header">
@@ -38,6 +74,13 @@ export function TaskItem({
           onChange={(_, value) => onUpdateName(value)}
           placeholder="Task name"
           className="task-item__name"
+        />
+        <Dropdown
+          items={workItemTypeItems}
+          selection={workItemTypeSelection}
+          onSelect={handleWorkItemTypeSelect}
+          className="task-item__type"
+          placeholder="Work Item Type"
         />
         <Button
           iconProps={{ iconName: 'Delete' }}

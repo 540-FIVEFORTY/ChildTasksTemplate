@@ -202,14 +202,17 @@ export class ChildTasksService {
                     }
                 }
 
-                console.info("[ChildTasksService] Creating task:", task.name)
+                // Use workItemType from task template, default to "Task"
+                const workItemType = task.workItemType || "Task"
+
+                console.info("[ChildTasksService] Creating work item:", task.name, "Type:", workItemType)
                 console.log("[ChildTasksService] Patch document:", JSON.stringify(patch, null, 2))
 
                 try {
-                    const workItem = await this.createWorkItem(projectId, "Task", patch)
-                    console.info("[ChildTasksService] Created task", workItem.id)
+                    const workItem = await this.createWorkItem(projectId, workItemType, patch)
+                    console.info("[ChildTasksService] Created work item", workItem.id, "Type:", workItemType)
                 } catch (error) {
-                    console.error("[ChildTasksService] Failed to create task:", error)
+                    console.error("[ChildTasksService] Failed to create work item:", error)
                     throw error
                 }
             }
