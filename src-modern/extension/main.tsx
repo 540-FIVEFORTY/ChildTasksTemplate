@@ -1,41 +1,75 @@
 /**
  * Extension entry point - "Add tasks" menu action
  */
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import { QueryClientProvider } from '@tanstack/react-query';
-import * as SDK from 'azure-devops-extension-sdk';
+console.log('[Extension] Module loading started...');
 
-import { queryClient } from '../config/query-client';
-import { ExtensionApp } from './ExtensionApp';
+import * as SDK from 'azure-devops-extension-sdk';
+import { ServiceIds } from '@core/constants/service-ids';
+
+// Dialog service interface (not exported from azure-devops-extension-api)
+interface IHostDialogService {
+  openCustomDialog(contributionId: string, options?: any): Promise<any>;
+}
+
+console.log('[Extension] SDK imported');
 
 // Initialize and register extension
 async function init() {
-  await SDK.init({ applyTheme: true, loaded: false });
-  await SDK.ready();
+  console.log('[Extension] init() starting...');
+  try {
+    await SDK.init({ applyTheme: true, loaded: false });
+    console.log('[Extension] SDK.init() completed');
 
-  // Register the extension action
-  SDK.register(SDK.getContributionId(), () => ({
-    execute: async (context: any) => {
-      // This will be handled by ExtensionApp
-      (window as any).__extensionContext = context;
-    },
-  }));
+    await SDK.ready();
+    console.log('[Extension] SDK.ready() completed');
 
-  await SDK.notifyLoadSucceeded();
+    // Register the extension action
+    const contributionId = SDK.getContributionId();
+    console.log('[Extension] Contribution ID:', contributionId);
+
+    SDK.register(contributionId, () => ({
+      execute: async (context: any) => {
+        console.log('[Extension] Execute called with context:', context);
+
+        try {
+          // Get the dialog service
+          const dialogService = await SDK.getService<IHostDialogService>(
+            ServiceIds.HostDialogService
+          );
+          console.log('[Extension] Dialog service obtained');
+
+          // Get extension context to build contribution ID
+          const extensionContext = SDK.getExtensionContext();
+          const chooseContributionId = `${extensionContext.publisherId}.${extensionContext.extensionId}.child-tasks-template-choose`;
+          console.log('[Extension] Opening dialog with contribution:', chooseContributionId);
+
+          // Open the choose template dialog
+          await dialogService.openCustomDialog(chooseContributionId, {
+            title: 'Add Child Tasks',
+            configuration: context,
+            resizable: true,
+            modal: true,
+            width: 500,
+            height: 400,
+          });
+
+          console.log('[Extension] Dialog opened successfully');
+        } catch (error) {
+          console.error('[Extension] Failed to open dialog:', error);
+        }
+      },
+    }));
+    console.log('[Extension] Extension registered');
+
+    await SDK.notifyLoadSucceeded();
+    console.log('[Extension] notifyLoadSucceeded() completed');
+  } catch (error) {
+    console.error('[Extension] init() failed:', error);
+    throw error;
+  }
 }
 
-// Render app
-const container = document.getElementById('root');
-if (container) {
-  const root = createRoot(container);
-  root.render(
-    <StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <ExtensionApp />
-      </QueryClientProvider>
-    </StrictMode>
-  );
-}
-
-init().catch(console.error);
+console.log('[Extension] Calling init()...');
+init().catch((error) => {
+  console.error('[Extension] init() promise rejected:', error);
+});

@@ -8,8 +8,9 @@ import type {
   IExtensionDataService,
   IProjectPageService,
 } from 'azure-devops-extension-api';
-import { CommonServiceIds } from 'azure-devops-extension-api';
 import * as SDK from 'azure-devops-extension-sdk';
+
+import { ServiceIds } from '@core/constants/service-ids';
 
 import type { Template, TemplateSetup } from '@core/models';
 import { SettingsUpgrade } from '@core/utils/settings-upgrade';
@@ -34,7 +35,7 @@ export class TemplateService {
 
     // Récupérer le projet courant
     const projectService = await SDK.getService<IProjectPageService>(
-      CommonServiceIds.ProjectPageService
+      ServiceIds.ProjectPageService
     );
     const project = await projectService.getProject();
 
@@ -47,7 +48,7 @@ export class TemplateService {
     // Récupérer le data manager
     const extensionContext = SDK.getExtensionContext();
     const dataService = await SDK.getService<IExtensionDataService>(
-      CommonServiceIds.ExtensionDataService
+      ServiceIds.ExtensionDataService
     );
 
     this.dataManager = await dataService.getExtensionDataManager(

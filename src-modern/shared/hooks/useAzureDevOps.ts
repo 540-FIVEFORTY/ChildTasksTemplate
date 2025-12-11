@@ -7,7 +7,8 @@ import type {
   IProjectPageService,
   IHostPageLayoutService,
 } from 'azure-devops-extension-api';
-import { CommonServiceIds } from 'azure-devops-extension-api';
+
+import { ServiceIds } from '@core/constants/service-ids';
 
 /**
  * Initialize Azure DevOps SDK
@@ -35,7 +36,7 @@ export function useAzureSDK() {
  */
 export async function getCurrentProject() {
   const projectService = await SDK.getService<IProjectPageService>(
-    CommonServiceIds.ProjectPageService
+    ServiceIds.ProjectPageService
   );
   return projectService.getProject();
 }
@@ -45,6 +46,6 @@ export async function getCurrentProject() {
  */
 export async function getPageLayoutService() {
   return SDK.getService<IHostPageLayoutService>(
-    CommonServiceIds.HostPageLayoutService
+    ServiceIds.HostPageLayoutService
   );
 }

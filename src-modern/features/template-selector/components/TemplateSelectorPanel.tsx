@@ -29,13 +29,16 @@ export function TemplateSelectorPanel() {
   const {
     templates,
     selectedTemplateNames,
-    isLoading,
+    isLoading: isLoadingTemplates,
     error,
     toggleTemplate,
     isSelected,
     hasSelection,
     selectionCount,
   } = useTemplateSelection();
+
+  // Wait for SDK to be ready
+  const isLoading = !dialog.isReady || isLoadingTemplates;
 
   const { createTasks, isCreating } = useTaskCreation();
 
