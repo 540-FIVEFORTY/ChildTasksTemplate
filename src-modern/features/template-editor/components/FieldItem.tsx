@@ -1,7 +1,7 @@
 /**
- * FieldItem - Editable field component
+ * FieldItem - Editable field component with autocomplete for field names
  */
-import { useMemo } from 'react';
+import { useMemo, useState, useRef, useCallback } from 'react';
 import { TextField } from 'azure-devops-ui/TextField';
 import { Button } from 'azure-devops-ui/Button';
 import { Dropdown } from 'azure-devops-ui/Dropdown';
@@ -10,11 +10,43 @@ import type { Field, FieldType } from '@core/models';
 
 interface FieldItemProps {
   field: Field;
+  existingFieldNames: string[]; // Names of other fields in the same task (for duplicate check)
   onUpdateName: (name: string) => void;
   onUpdateValue: (value: string) => void;
   onUpdateType: (type: FieldType) => void;
   onRemove: () => void;
 }
+
+// Common Azure DevOps field names for autocomplete
+const COMMON_FIELDS = [
+  // System fields
+  { name: 'System.Title', description: 'Title', type: 'text' as const },
+  { name: 'System.Description', description: 'Description', type: 'text' as const },
+  { name: 'System.AssignedTo', description: 'Assigned To', type: 'text' as const },
+  { name: 'System.State', description: 'State', type: 'text' as const },
+  { name: 'System.Reason', description: 'Reason', type: 'text' as const },
+  { name: 'System.IterationPath', description: 'Iteration Path', type: 'text' as const },
+  { name: 'System.AreaPath', description: 'Area Path', type: 'text' as const },
+  { name: 'System.Tags', description: 'Tags', type: 'text' as const },
+  // Scheduling fields
+  { name: 'Microsoft.VSTS.Scheduling.OriginalEstimate', description: 'Original Estimate (hours)', type: 'number' as const },
+  { name: 'Microsoft.VSTS.Scheduling.RemainingWork', description: 'Remaining Work (hours)', type: 'number' as const },
+  { name: 'Microsoft.VSTS.Scheduling.CompletedWork', description: 'Completed Work (hours)', type: 'number' as const },
+  { name: 'Microsoft.VSTS.Scheduling.StoryPoints', description: 'Story Points', type: 'number' as const },
+  { name: 'Microsoft.VSTS.Scheduling.Effort', description: 'Effort', type: 'number' as const },
+  { name: 'Microsoft.VSTS.Scheduling.Size', description: 'Size', type: 'number' as const },
+  // Common fields
+  { name: 'Microsoft.VSTS.Common.Priority', description: 'Priority', type: 'number' as const },
+  { name: 'Microsoft.VSTS.Common.Severity', description: 'Severity', type: 'text' as const },
+  { name: 'Microsoft.VSTS.Common.Activity', description: 'Activity', type: 'text' as const },
+  { name: 'Microsoft.VSTS.Common.BusinessValue', description: 'Business Value', type: 'number' as const },
+  { name: 'Microsoft.VSTS.Common.StackRank', description: 'Stack Rank', type: 'number' as const },
+  { name: 'Microsoft.VSTS.Common.AcceptanceCriteria', description: 'Acceptance Criteria', type: 'text' as const },
+  { name: 'Microsoft.VSTS.Common.ValueArea', description: 'Value Area', type: 'text' as const },
+  // Build fields
+  { name: 'Microsoft.VSTS.Build.IntegrationBuild', description: 'Integration Build', type: 'text' as const },
+  { name: 'Microsoft.VSTS.Build.FoundIn', description: 'Found In', type: 'text' as const },
+];
 
 // Known numeric fields in Azure DevOps (comprehensive list)
 const NUMERIC_FIELDS = [
@@ -119,11 +151,53 @@ const TYPE_OPTIONS = [
 
 export function FieldItem({
   field,
+  existingFieldNames,
   onUpdateName,
   onUpdateValue,
   onUpdateType,
   onRemove,
 }: FieldItemProps) {
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searchText, setSearchText] = useState(field.name);
+  const nameInputRef = useRef<HTMLDivElement>(null);
+
+  // Check for duplicate field name
+  const isDuplicate = useMemo(() => {
+    if (!field.name.trim()) return false;
+    return existingFieldNames.some(
+      (name) => name.toLowerCase() === field.name.toLowerCase()
+    );
+  }, [field.name, existingFieldNames]);
+
+  // Filter suggestions based on input
+  const filteredSuggestions = useMemo(() => {
+    if (!searchText) return COMMON_FIELDS;
+    const lower = searchText.toLowerCase();
+    return COMMON_FIELDS.filter(
+      (f) =>
+        f.name.toLowerCase().includes(lower) ||
+        f.description.toLowerCase().includes(lower)
+    );
+  }, [searchText]);
+
+  // Handle name input change
+  const handleNameChange = useCallback((_: unknown, value: string) => {
+    setSearchText(value);
+    onUpdateName(value);
+    setShowSuggestions(true);
+  }, [onUpdateName]);
+
+  // Handle suggestion selection
+  const handleSuggestionSelect = useCallback((suggestion: typeof COMMON_FIELDS[0]) => {
+    setSearchText(suggestion.name);
+    onUpdateName(suggestion.name);
+    // Auto-set type based on suggestion
+    if (suggestion.type === 'number' && !isNumericField(suggestion.name)) {
+      onUpdateType('number');
+    }
+    setShowSuggestions(false);
+  }, [onUpdateName, onUpdateType]);
+
   // Normalize on blur only
   const handleValueBlur = () => {
     const normalized = normalizeNumericValue(field.value || '');
@@ -164,7 +238,15 @@ export function FieldItem({
     onUpdateType(item.id as FieldType);
   };
 
-  const errorStyle: React.CSSProperties = hasInvalidValue
+  const valueErrorStyle: React.CSSProperties = hasInvalidValue
+    ? {
+        border: '2px solid #d32f2f',
+        backgroundColor: '#fdecea',
+        borderRadius: '4px',
+      }
+    : {};
+
+  const nameErrorStyle: React.CSSProperties = isDuplicate
     ? {
         border: '2px solid #d32f2f',
         backgroundColor: '#fdecea',
@@ -175,13 +257,31 @@ export function FieldItem({
   return (
     <div className="field-item">
       <div className={`field-item__row ${showTypeSelector ? 'field-item__row--with-type' : ''}`}>
-        <TextField
-          value={field.name}
-          onChange={(_, value) => onUpdateName(value)}
-          placeholder="Field name (e.g. System.Description)"
-          className="field-item__name"
-        />
-        <div style={errorStyle}>
+        <div className="field-item__name-container" ref={nameInputRef} style={nameErrorStyle}>
+          <TextField
+            value={searchText}
+            onChange={handleNameChange}
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+            placeholder="Field name (type or select)"
+            className="field-item__name"
+          />
+          {showSuggestions && filteredSuggestions.length > 0 && (
+            <div className="field-item__suggestions">
+              {filteredSuggestions.slice(0, 8).map((suggestion) => (
+                <div
+                  key={suggestion.name}
+                  className="field-item__suggestion"
+                  onMouseDown={() => handleSuggestionSelect(suggestion)}
+                >
+                  <span className="field-item__suggestion-name">{suggestion.name}</span>
+                  <span className="field-item__suggestion-desc">{suggestion.description}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div style={valueErrorStyle}>
           <TextField
             value={field.value || ''}
             onChange={(_, value) => onUpdateValue(value)}
@@ -205,6 +305,11 @@ export function FieldItem({
           tooltipProps={{ text: 'Remove field' }}
         />
       </div>
+      {isDuplicate && (
+        <div className="field-item__error field-item__error--name">
+          This field name is already used in this task
+        </div>
+      )}
       {hasInvalidValue && (
         <div className="field-item__error">
           This field requires a numeric value

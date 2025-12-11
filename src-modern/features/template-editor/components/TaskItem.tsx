@@ -55,16 +55,25 @@ export function TaskItem({
           </div>
         )}
 
-        {task.fields.map((field, fieldIndex) => (
-          <FieldItem
-            key={fieldIndex}
-            field={field}
-            onUpdateName={(name) => onUpdateFieldName(fieldIndex, name)}
-            onUpdateValue={(value) => onUpdateFieldValue(fieldIndex, value)}
-            onUpdateType={(type) => onUpdateFieldType(fieldIndex, type)}
-            onRemove={() => onRemoveField(fieldIndex)}
-          />
-        ))}
+        {task.fields.map((field, fieldIndex) => {
+          // Get names of other fields (excluding current one) for duplicate check
+          const otherFieldNames = task.fields
+            .filter((_, idx) => idx !== fieldIndex)
+            .map((f) => f.name)
+            .filter((name) => name.trim() !== '');
+
+          return (
+            <FieldItem
+              key={fieldIndex}
+              field={field}
+              existingFieldNames={otherFieldNames}
+              onUpdateName={(name) => onUpdateFieldName(fieldIndex, name)}
+              onUpdateValue={(value) => onUpdateFieldValue(fieldIndex, value)}
+              onUpdateType={(type) => onUpdateFieldType(fieldIndex, type)}
+              onRemove={() => onRemoveField(fieldIndex)}
+            />
+          );
+        })}
 
         <Button
           text="Add Field"
