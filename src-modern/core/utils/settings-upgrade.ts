@@ -4,7 +4,7 @@ import type { TemplateSetup } from '../models/TemplateSetup';
 import sample from './templateSetupSample.json';
 
 export class SettingsUpgrade {
-  private static currentVersion = 2;
+  private static currentVersion = 3;
 
   public static upgradeToCurrent(obj: any): TemplateSetup {
     if (!obj) {

@@ -1,146 +1,37 @@
 {
-    "version":2,
+    "version": 3,
     "templates": [
         {
-            "name": "default",
+            "name": "Development",
             "tasks": [
                 {
-                    "name": "Design Task",
+                    "name": "Design",
+                    "workItemType": "Task",
                     "fields": [
-                        {
-                            "name": "System.Title",
-                            "value": "{System.Title} AF:{id}"
-                        },
-                        {
-                            "name": "System.IterationPath",
-                            "value": "{System.IterationPath}"
-                        },
-                        {
-                            "name": "System.AreaPath",
-                            "value": "{System.AreaPath}"
-                        },
-                        {
-                            "name": "Microsoft.VSTS.Common.Priority",
-                            "value": "{Microsoft.VSTS.Common.Priority}"
-                        },
-                        {
-                            "name": "Microsoft.VSTS.Common.Activity",
-                            "value": "Design"
-                        }
+                        { "name": "System.IterationPath", "value": "{System.IterationPath}" },
+                        { "name": "System.AreaPath", "value": "{System.AreaPath}" },
+                        { "name": "Microsoft.VSTS.Common.Activity", "value": "Design" },
+                        { "name": "Microsoft.VSTS.Scheduling.OriginalEstimate", "value": "2" }
                     ]
                 },
                 {
-                    "name": "Dev Task",
+                    "name": "Development",
+                    "workItemType": "Task",
                     "fields": [
-                        {
-                            "name": "System.Title",
-                            "value": "{System.Title} DEV:{id}"
-                        },
-                        {
-                            "name": "System.IterationPath",
-                            "value": "{System.IterationPath}"
-                        },
-                        {
-                            "name": "System.AreaPath",
-                            "value": "{System.AreaPath}"
-                        },
-                        {
-                            "name": "Microsoft.VSTS.Common.Activity",
-                            "value": "Development"
-                        }
+                        { "name": "System.IterationPath", "value": "{System.IterationPath}" },
+                        { "name": "System.AreaPath", "value": "{System.AreaPath}" },
+                        { "name": "Microsoft.VSTS.Common.Activity", "value": "Development" },
+                        { "name": "Microsoft.VSTS.Scheduling.OriginalEstimate", "value": "8" }
                     ]
                 },
                 {
-                    "name": "Test Task",
+                    "name": "Testing",
+                    "workItemType": "Task",
                     "fields": [
-                        {
-                            "name": "System.Title",
-                            "value": "{System.Title} TEST:{id}"
-                        },
-                        {
-                            "name": "System.IterationPath",
-                            "value": "{System.IterationPath}"
-                        },
-                        {
-                            "name": "System.AreaPath",
-                            "value": "{System.AreaPath}"
-                        },
-                        {
-                            "name": "Microsoft.VSTS.Common.Activity",
-                            "value": "Testing"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "other",
-            "tasks": [
-                {
-                    "name": "Design Task",
-                    "fields": [
-                        {
-                            "name": "System.Title",
-                            "value": "{System.Title} AF:{id}"
-                        },
-                        {
-                            "name": "System.IterationPath",
-                            "value": "{System.IterationPath}"
-                        },
-                        {
-                            "name": "System.AreaPath",
-                            "value": "{System.AreaPath}"
-                        },
-                        {
-                            "name": "Microsoft.VSTS.Common.Priority",
-                            "value": "{Microsoft.VSTS.Common.Priority}"
-                        },
-                        {
-                            "name": "Microsoft.VSTS.Common.Activity",
-                            "value": "Design"
-                        }
-                    ]
-                },
-                {
-                    "name": "Dev Task",
-                    "fields": [
-                        {
-                            "name": "System.Title",
-                            "value": "{System.Title} DEV:{id}"
-                        },
-                        {
-                            "name": "System.IterationPath",
-                            "value": "{System.IterationPath}"
-                        },
-                        {
-                            "name": "System.AreaPath",
-                            "value": "{System.AreaPath}"
-                        },
-                        {
-                            "name": "Microsoft.VSTS.Common.Activity",
-                            "value": "Development"
-                        }
-                    ]
-                },
-                {
-                    "name": "Test Task",
-                    "fields": [
-                        {
-                            "name": "System.Title",
-                            "value": "{System.Title} TEST:{id}"
-                        },
-                        {
-                            "name": "System.IterationPath",
-                            "value": "{System.IterationPath}"
-                        },
-                        {
-                            "name": "System.AreaPath",
-                            "value": "{System.AreaPath}"
-                        },
-                        {
-                            "name": "Microsoft.VSTS.Common.Activity",
-                            "value": "Testing"
-                        }
+                        { "name": "System.IterationPath", "value": "{System.IterationPath}" },
+                        { "name": "System.AreaPath", "value": "{System.AreaPath}" },
+                        { "name": "Microsoft.VSTS.Common.Activity", "value": "Testing" },
+                        { "name": "Microsoft.VSTS.Scheduling.OriginalEstimate", "value": "4" }
                     ]
                 }
             ]
