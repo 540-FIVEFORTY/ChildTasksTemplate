@@ -23,7 +23,14 @@ export class TemplateService {
   private dataManager: IExtensionDataManager | null = null;
   private projectId: string | null = null;
 
-  private static readonly SETTINGS_KEY = 'ChildTasksTemplate';
+  private static readonly SETTINGS_KEY_PREFIX = 'ChildTasksTemplate';
+
+  /**
+   * Get the project-specific settings key
+   */
+  private getSettingsKey(): string {
+    return `${TemplateService.SETTINGS_KEY_PREFIX}_${this.projectId}`;
+  }
 
   /**
    * Initialisation du service (lazy)
@@ -64,13 +71,16 @@ export class TemplateService {
     await this.ensureInitialized();
 
     try {
+      console.log(`[TemplateService] Loading templates for project ${this.projectId} (key: ${this.getSettingsKey()})`);
       const data = await this.dataManager!.getValue<unknown>(
-        TemplateService.SETTINGS_KEY,
+        this.getSettingsKey(),
         { scopeType: 'Default' }
       );
 
       // Upgrade si nécessaire (migration depuis ancienne version)
-      return SettingsUpgrade.upgrade(data);
+      const setup = SettingsUpgrade.upgrade(data);
+      console.log(`[TemplateService] Loaded ${setup.templates.length} templates`);
+      return setup;
     } catch (error) {
       console.error('Failed to load template setup:', error);
       // Retourner la configuration par défaut
@@ -89,10 +99,11 @@ export class TemplateService {
 
     try {
       await this.dataManager!.setValue(
-        TemplateService.SETTINGS_KEY,
+        this.getSettingsKey(),
         setup,
         { scopeType: 'Default' }
       );
+      console.log(`[TemplateService] Saved templates for project ${this.projectId}`);
     } catch (error) {
       console.error('Failed to save template setup:', error);
       throw new Error('Failed to save templates configuration');
