@@ -87,8 +87,57 @@ export class ChildTasksService {
         return {
             op: "add",
             path: "/fields/" + field,
-            value: value,
+            value: ChildTasksService.normalizeValue(field, value),
         }
+    }
+
+    /**
+     * Normalize numeric values - converts comma decimal separator to period
+     * and converts string numbers to actual numbers for numeric fields
+     */
+    private static normalizeValue(fieldName: string, value: any): any {
+        if (value === null || value === undefined) {
+            return value
+        }
+
+        // List of known numeric fields in Azure DevOps
+        const numericFields = [
+            "Microsoft.VSTS.Scheduling.RemainingWork",
+            "Microsoft.VSTS.Scheduling.OriginalEstimate",
+            "Microsoft.VSTS.Scheduling.CompletedWork",
+            "Microsoft.VSTS.Scheduling.StoryPoints",
+            "Microsoft.VSTS.Scheduling.Effort",
+            "Microsoft.VSTS.Scheduling.Size",
+            "Microsoft.VSTS.Common.Priority",
+            "Microsoft.VSTS.Common.StackRank",
+            "Microsoft.VSTS.Common.BusinessValue",
+            "Microsoft.VSTS.Common.TimeCriticality",
+        ]
+
+        const isNumericField = numericFields.some(f =>
+            fieldName.toLowerCase() === f.toLowerCase()
+        )
+
+        if (typeof value === "string") {
+            // Normalize comma to period for decimal values
+            const normalized = value.replace(",", ".")
+
+            // For numeric fields, convert to number
+            if (isNumericField) {
+                const num = parseFloat(normalized)
+                if (!isNaN(num)) {
+                    return num
+                }
+            }
+
+            // For other fields, just return normalized string if it looks like a number
+            // This handles cases where other numeric fields might exist
+            if (/^-?\d+([.,]\d+)?$/.test(value)) {
+                return normalized
+            }
+        }
+
+        return value
     }
 
     private newParentRelation(parent: WorkItem): JsonPatchOperation {

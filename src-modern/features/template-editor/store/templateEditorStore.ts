@@ -7,7 +7,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
-import type { TemplateSetup, Template, Task, Field } from '@core/models';
+import type { TemplateSetup, Template, Task, Field, FieldType } from '@core/models';
 
 /**
  * Erreur de validation
@@ -60,6 +60,12 @@ interface TemplateEditorState {
     taskIndex: number,
     fieldIndex: number,
     value: string
+  ) => void;
+  updateFieldType: (
+    templateIndex: number,
+    taskIndex: number,
+    fieldIndex: number,
+    type: FieldType
   ) => void;
 
   // Actions - Validation
@@ -299,6 +305,17 @@ export const useTemplateEditorStore = create<TemplateEditorState>()(
               fieldIndex
             ];
           field.value = value;
+          state.isDirty = true;
+        }),
+
+      updateFieldType: (templateIndex, taskIndex, fieldIndex, type) =>
+        set((state) => {
+          if (!state.templateSetup) return;
+          const field =
+            state.templateSetup.templates[templateIndex].tasks[taskIndex].fields[
+              fieldIndex
+            ];
+          field.type = type;
           state.isDirty = true;
         }),
 

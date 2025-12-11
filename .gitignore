@@ -329,5 +329,8 @@ ASALocalRun/
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
 
-# distribution files 
+# distribution files
 dist/
+
+# Azure DevOps extension packages
+*.vsix
