@@ -1,8 +1,9 @@
 .template-editor {
-  padding: 20px;
-  width: min(100%, 1680px);
-  max-width: calc(100vw - 32px);
-  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 20px 0;
+  width: 100%;
+  max-width: none;
+  margin: 0;
 
   &--loading,
   &--empty {

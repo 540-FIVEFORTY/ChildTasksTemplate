@@ -1,6 +1,8 @@
 .settings-page {
-  padding: 20px;
-  max-width: 1200px;
+  box-sizing: border-box;
+  padding: 20px 16px;
+  width: min(100%, 1760px);
+  max-width: calc(100vw - 32px);
   margin: 0 auto;
 
   &--loading {
