@@ -1,6 +1,7 @@
 .template-editor {
   padding: 20px;
-  max-width: 1200px;
+  width: min(100%, 1680px);
+  max-width: calc(100vw - 32px);
   margin: 0 auto;
 
   &--loading,
@@ -224,7 +225,7 @@
     display: grid;
     grid-template-columns:
       var(--field-name-column-width, minmax(320px, 48ch))
-      minmax(220px, 1fr)
+      minmax(320px, 1fr)
       32px;
     gap: 8px;
     margin-bottom: 8px;
@@ -245,7 +246,7 @@
     display: grid;
     grid-template-columns:
       var(--field-name-column-width, minmax(320px, 48ch))
-      minmax(220px, 1fr)
+      minmax(320px, 1fr)
       32px;
     gap: 8px;
     align-items: center;
@@ -253,7 +254,7 @@
     &--with-type {
       grid-template-columns:
         var(--field-name-column-width, minmax(320px, 48ch))
-        minmax(220px, 1fr)
+        minmax(320px, 1fr)
         100px
         32px;
     }

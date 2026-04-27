@@ -40,5 +40,8 @@ describe('TemplateItem', () => {
     });
 
     expect(container.textContent).toContain('Remove template');
+    expect(container.querySelector('.template-item__remove')?.className).not.toContain(
+      'subtle'
+    );
   });
 });

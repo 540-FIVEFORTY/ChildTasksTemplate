@@ -61,7 +61,6 @@ export function TemplateItem({
         <Button
           text="Remove template"
           iconProps={{ iconName: 'Delete' }}
-          subtle
           danger
           onClick={onRemove}
           tooltipProps={{ text: 'Remove template' }}
