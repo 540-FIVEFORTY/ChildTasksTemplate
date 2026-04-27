@@ -1,6 +1,6 @@
 {
   "name": "child-tasks-template",
-  "version": "3.0.30",
+  "version": "3.0.31",
   "description": "Azure DevOps extension for creating child tasks from templates - Modern Architecture",
   "type": "module",
   "private": true,

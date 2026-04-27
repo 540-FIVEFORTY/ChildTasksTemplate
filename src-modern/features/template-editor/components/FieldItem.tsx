@@ -396,6 +396,14 @@ export function FieldItem({
     return 'Text or parent-field value';
   }, [isNumeric, selectedFieldOption?.metadata]);
 
+  const formatExample = useMemo(() => {
+    if (expectedFormat !== 'Decimal number') {
+      return null;
+    }
+
+    return 'Example: 2.5 or 2,5';
+  }, [expectedFormat]);
+
   const valueErrorStyle: React.CSSProperties = hasInvalidValue
     ? {
         border: '2px solid #d32f2f',
@@ -510,6 +518,7 @@ export function FieldItem({
       {selectedFieldOption?.metadata && (
         <div className="field-item__hint">
           Expected format: {expectedFormat}
+          {formatExample ? ` - ${formatExample}` : ''}
         </div>
       )}
     </div>

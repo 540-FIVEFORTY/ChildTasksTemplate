@@ -80,4 +80,34 @@ describe('FieldItem', () => {
       container.querySelector('.field-item__value input')
     ).not.toBeNull();
   });
+
+  it('shows a decimal value example when the selected field expects a decimal number', () => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = createRoot(container);
+
+    act(() => {
+      root.render(
+        <FieldItem
+          field={{ name: 'Microsoft.VSTS.Scheduling.OriginalEstimate', value: '' }}
+          availableFields={[
+            {
+              name: 'Original Estimate',
+              referenceName: 'Microsoft.VSTS.Scheduling.OriginalEstimate',
+              type: 'double',
+            },
+          ]}
+          existingFieldNames={[]}
+          onUpdateName={vi.fn()}
+          onUpdateValue={vi.fn()}
+          onUpdateType={vi.fn()}
+          onRemove={vi.fn()}
+        />
+      );
+    });
+
+    expect(container.querySelector('.field-item__hint')?.textContent).toContain(
+      'Expected format: Decimal number - Example: 2.5 or 2,5'
+    );
+  });
 });
