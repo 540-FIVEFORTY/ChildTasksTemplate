@@ -38,6 +38,7 @@ interface TemplateEditorState {
 
   // Actions - Templates
   addTemplate: () => void;
+  importTemplates: (templates: Template[]) => { importedNames: string[] };
   removeTemplate: (index: number) => void;
   updateTemplateName: (index: number, name: string) => void;
 
@@ -102,6 +103,10 @@ function createEmptyField(): Field {
     name: '',
     value: '',
   };
+}
+
+function cloneTemplate(template: Template): Template {
+  return JSON.parse(JSON.stringify(template)) as Template;
 }
 
 /**
@@ -229,6 +234,52 @@ export const useTemplateEditorStore = create<TemplateEditorState>()(
           state.templateSetup.templates.push(createEmptyTemplate(index));
           state.isDirty = true;
         }),
+
+      importTemplates: (templates) => {
+        const currentSetup = get().templateSetup ?? {
+          version: 3,
+          templates: [],
+        };
+        const existingNames = new Set(
+          currentSetup.templates.map((template) => template.name.trim().toLowerCase())
+        );
+        const duplicateNames = new Set<string>();
+        const importedNames = templates.map((template) => template.name);
+        const importedNamesSeen = new Set<string>();
+
+        for (const template of templates) {
+          const normalized = template.name.trim().toLowerCase();
+          if (existingNames.has(normalized) || importedNamesSeen.has(normalized)) {
+            duplicateNames.add(template.name);
+          }
+          importedNamesSeen.add(normalized);
+        }
+
+        if (duplicateNames.size > 0) {
+          throw new Error(
+            `Template names already exist: ${Array.from(duplicateNames).join(', ')}`
+          );
+        }
+
+        set((state) => {
+          if (!state.templateSetup) {
+            state.templateSetup = {
+              version: 3,
+              templates: [],
+            };
+          }
+
+          state.templateSetup.templates.push(
+            ...templates.map((template) => cloneTemplate(template))
+          );
+          state.isDirty = true;
+          state.validationErrors = [];
+          state.hasErrors = false;
+          state.hasWarnings = false;
+        });
+
+        return { importedNames };
+      },
 
       removeTemplate: (index) =>
         set((state) => {

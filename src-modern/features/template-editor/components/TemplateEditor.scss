@@ -52,6 +52,52 @@
     margin-top: 16px;
   }
 
+  &__import-panel {
+    margin-top: 16px;
+    padding: 16px;
+    background: var(--palette-neutral-2, #fafafa);
+    border: 1px solid var(--palette-neutral-20, #e0e0e0);
+    border-radius: 4px;
+
+    h3 {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    p {
+      margin: 0 0 12px 0;
+      color: var(--text-secondary-color, #666);
+    }
+  }
+
+  &__import-textarea {
+    width: 100%;
+    min-height: 220px;
+    padding: 12px;
+    margin-top: 8px;
+    border: 1px solid var(--palette-neutral-20, #e0e0e0);
+    border-radius: 4px;
+    background: var(--background-color, #fff);
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    resize: vertical;
+
+    &:focus {
+      outline: none;
+      border-color: var(--communication-foreground, #0078d4);
+      box-shadow: 0 0 0 1px var(--communication-foreground, #0078d4);
+    }
+  }
+
+  &__import-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
   &__help {
     margin-top: 32px;
     padding: 16px;
@@ -170,7 +216,10 @@
 
   &__fields-header {
     display: grid;
-    grid-template-columns: 1fr 1fr 32px;
+    grid-template-columns:
+      var(--field-name-column-width, minmax(280px, 36ch))
+      minmax(220px, 1fr)
+      32px;
     gap: 8px;
     margin-bottom: 8px;
     font-size: 12px;
@@ -188,16 +237,28 @@
 
   &__row {
     display: grid;
-    grid-template-columns: 1fr 1fr 32px;
+    grid-template-columns:
+      var(--field-name-column-width, minmax(280px, 36ch))
+      minmax(220px, 1fr)
+      32px;
     gap: 8px;
     align-items: center;
 
     &--with-type {
-      grid-template-columns: 1fr 1fr 100px 32px;
+      grid-template-columns:
+        var(--field-name-column-width, minmax(280px, 36ch))
+        minmax(220px, 1fr)
+        100px
+        32px;
     }
   }
 
   &__name-container {
+    position: relative;
+    width: 100%;
+  }
+
+  &__value-container {
     position: relative;
     width: 100%;
   }
@@ -215,7 +276,8 @@
     position: absolute;
     top: 100%;
     left: 0;
-    right: 0;
+    min-width: var(--field-name-suggestions-width, 42ch);
+    max-width: min(90vw, 72ch);
     background: var(--background-color, #fff);
     border: 1px solid var(--palette-neutral-20, #e0e0e0);
     border-radius: 4px;
@@ -223,6 +285,10 @@
     z-index: 1000;
     max-height: 300px;
     overflow-y: auto;
+
+    &--value {
+      min-width: min(32ch, calc(100vw - 120px));
+    }
   }
 
   &__suggestion {
@@ -251,6 +317,7 @@
   &__suggestion-desc {
     font-size: 11px;
     color: var(--text-secondary-color, #666);
+    white-space: normal;
   }
 
   &__error {
@@ -262,6 +329,13 @@
     &--name {
       padding-left: 0;
     }
+  }
+
+  &__hint {
+    color: var(--text-secondary-color, #666);
+    font-size: 12px;
+    margin-top: 4px;
+    padding-left: calc(50% + 4px);
   }
 }
 

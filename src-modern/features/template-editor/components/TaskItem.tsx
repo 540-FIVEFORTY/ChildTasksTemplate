@@ -1,14 +1,19 @@
 /**
  * TaskItem - Editable task component with fields
  */
+import { useQuery } from '@tanstack/react-query';
 import { TextField } from 'azure-devops-ui/TextField';
 import { Button } from 'azure-devops-ui/Button';
 import { Dropdown } from 'azure-devops-ui/Dropdown';
 import { DropdownSelection } from 'azure-devops-ui/Utilities/DropdownSelection';
 import type { IListBoxItem } from 'azure-devops-ui/ListBox';
-import { useMemo } from 'react';
+import { useMemo, type CSSProperties } from 'react';
 import type { Task, FieldType } from '@core/models';
 import { FieldItem } from './FieldItem';
+import {
+  workItemMetadataService,
+  type WorkItemFieldInfo,
+} from '@core/services';
 
 interface TaskItemProps {
   task: Task;
@@ -37,6 +42,13 @@ export function TaskItem({
   onUpdateFieldValue,
   onUpdateFieldType,
 }: TaskItemProps) {
+  const currentType = task.workItemType || 'Task';
+  const { data: availableFields = [] } = useQuery<WorkItemFieldInfo[]>({
+    queryKey: ['work-item-fields', currentType],
+    queryFn: () => workItemMetadataService.getFieldsForWorkItemType(currentType),
+    staleTime: 5 * 60 * 1000,
+  });
+
   // Create dropdown items from available work item types
   const workItemTypeItems: IListBoxItem[] = useMemo(
     () =>
@@ -50,13 +62,33 @@ export function TaskItem({
   // Create selection object for dropdown
   const workItemTypeSelection = useMemo(() => {
     const selection = new DropdownSelection();
-    const currentType = task.workItemType || 'Task';
     const index = availableWorkItemTypes.indexOf(currentType);
     if (index >= 0) {
       selection.select(index);
     }
     return selection;
-  }, [task.workItemType, availableWorkItemTypes]);
+  }, [currentType, availableWorkItemTypes]);
+
+  const fieldNameColumnWidth = useMemo(() => {
+    const longestReferenceName = availableFields.reduce(
+      (max, field) => Math.max(max, field.referenceName.length),
+      24
+    );
+
+    return `${Math.min(Math.max(longestReferenceName + 6, 28), 56)}ch`;
+  }, [availableFields]);
+
+  const fieldLayoutStyle = useMemo(
+    () =>
+      ({
+        '--field-name-column-width': `minmax(280px, ${fieldNameColumnWidth})`,
+        '--field-name-suggestions-width': `min(${Math.min(
+          Math.max(parseInt(fieldNameColumnWidth, 10) + 10, 42),
+          72
+        )}ch, calc(100vw - 120px))`,
+      }) as CSSProperties,
+    [fieldNameColumnWidth]
+  );
 
   const handleWorkItemTypeSelect = (
     _event: React.SyntheticEvent<HTMLElement>,
@@ -90,7 +122,7 @@ export function TaskItem({
         />
       </div>
 
-      <div className="task-item__fields">
+      <div className="task-item__fields" style={fieldLayoutStyle}>
         {task.fields.length > 0 && (
           <div className="task-item__fields-header">
             <span className="field-label">Field Name</span>
@@ -109,6 +141,7 @@ export function TaskItem({
             <FieldItem
               key={fieldIndex}
               field={field}
+              availableFields={availableFields}
               existingFieldNames={otherFieldNames}
               onUpdateName={(name) => onUpdateFieldName(fieldIndex, name)}
               onUpdateValue={(value) => onUpdateFieldValue(fieldIndex, value)}

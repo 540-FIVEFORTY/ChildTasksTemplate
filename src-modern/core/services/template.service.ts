@@ -24,12 +24,21 @@ export class TemplateService {
   private projectId: string | null = null;
 
   private static readonly SETTINGS_KEY_PREFIX = 'ChildTasksTemplate';
+  private static readonly LEGACY_SETTINGS_KEY_PREFIX =
+    'fiveforty-child-tasks-template';
 
   /**
    * Get the project-specific settings key
    */
   private getSettingsKey(): string {
     return `${TemplateService.SETTINGS_KEY_PREFIX}_${this.projectId}`;
+  }
+
+  /**
+   * Get the legacy project-specific settings key used by the old implementation.
+   */
+  private getLegacySettingsKey(): string {
+    return `${TemplateService.LEGACY_SETTINGS_KEY_PREFIX}-${this.projectId}`;
   }
 
   /**
@@ -71,20 +80,41 @@ export class TemplateService {
     await this.ensureInitialized();
 
     try {
-      console.log(`[TemplateService] Loading templates for project ${this.projectId} (key: ${this.getSettingsKey()})`);
-      const data = await this.dataManager!.getValue<unknown>(
-        this.getSettingsKey(),
-        { scopeType: 'Default' }
+      const currentKey = this.getSettingsKey();
+      console.log(
+        `[TemplateService] Loading templates for project ${this.projectId} (key: ${currentKey})`
       );
 
-      // Upgrade si nécessaire (migration depuis ancienne version)
-      const setup = SettingsUpgrade.upgrade(data);
-      console.log(`[TemplateService] Loaded ${setup.templates.length} templates`);
-      return setup;
+      const data = await this.dataManager!.getValue<unknown>(currentKey, {
+        scopeType: 'Default',
+      });
+
+      if (TemplateService.hasStoredValue(data)) {
+        const setup = SettingsUpgrade.upgrade(data);
+        console.log(
+          `[TemplateService] Loaded ${setup.templates.length} templates from current key`
+        );
+        return setup;
+      }
+
+      const legacyKey = this.getLegacySettingsKey();
+      const legacyData = await this.dataManager!.getValue<unknown>(legacyKey, {
+        scopeType: 'Default',
+      });
+
+      if (TemplateService.hasStoredValue(legacyData)) {
+        const setup = SettingsUpgrade.upgrade(legacyData);
+        console.log(
+          `[TemplateService] Loaded ${setup.templates.length} templates from legacy key`
+        );
+        await this.migrateLegacySetup(setup);
+        return setup;
+      }
+
+      return SettingsUpgrade.getDefaultSetup();
     } catch (error) {
       console.error('Failed to load template setup:', error);
-      // Retourner la configuration par défaut
-      return SettingsUpgrade.getDefaultSetup();
+      throw new Error('Failed to load templates configuration');
     }
   }
 
@@ -108,6 +138,34 @@ export class TemplateService {
       console.error('Failed to save template setup:', error);
       throw new Error('Failed to save templates configuration');
     }
+  }
+
+  private async migrateLegacySetup(setup: TemplateSetup): Promise<void> {
+    try {
+      await this.dataManager!.setValue(this.getSettingsKey(), setup, {
+        scopeType: 'Default',
+      });
+      console.log(
+        `[TemplateService] Migrated templates to current key for project ${this.projectId}`
+      );
+    } catch (error) {
+      console.warn(
+        '[TemplateService] Failed to migrate legacy templates to current key:',
+        error
+      );
+    }
+  }
+
+  private static hasStoredValue(value: unknown): boolean {
+    if (value === null || value === undefined) {
+      return false;
+    }
+
+    if (typeof value === 'string') {
+      return value.trim().length > 0;
+    }
+
+    return true;
   }
 
   /**

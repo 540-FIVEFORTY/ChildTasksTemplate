@@ -1,7 +1,8 @@
 /**
  * TemplateEditor - Main visual editor component
  */
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from 'azure-devops-ui/Button';
 import { ButtonGroup } from 'azure-devops-ui/ButtonGroup';
 import { MessageBar, MessageBarSeverity } from 'azure-devops-ui/MessageBar';
@@ -10,19 +11,19 @@ import { Spinner, SpinnerSize } from 'azure-devops-ui/Spinner';
 import { useTemplateEditorStore } from '../store/templateEditorStore';
 import { TemplateItem } from './TemplateItem';
 import type { TemplateSetup } from '@core/models';
+import { parseTemplateImport } from '@core/utils';
+import { workItemMetadataService } from '@core/services';
 
 import './TemplateEditor.scss';
 
-// All possible work item types that can be created as children across different processes
-// The actual valid types depend on parent type and process, but we show all options in settings
-const ALL_WORK_ITEM_TYPES = [
+const FALLBACK_WORK_ITEM_TYPES = [
   'Task',
   'Bug',
-  'User Story',        // Agile
-  'Product Backlog Item', // Scrum
-  'Requirement',       // CMMI
+  'User Story',
+  'Product Backlog Item',
+  'Requirement',
   'Feature',
-  'Issue',             // Basic
+  'Issue',
 ];
 
 interface TemplateEditorProps {
@@ -45,6 +46,7 @@ export function TemplateEditor({
     hasErrors,
     setTemplateSetup,
     addTemplate,
+    importTemplates,
     removeTemplate,
     updateTemplateName,
     addTask,
@@ -58,6 +60,21 @@ export function TemplateEditor({
     updateFieldType,
     validate,
   } = useTemplateEditorStore();
+  const [isImportOpen, setIsImportOpen] = useState(false);
+  const [importText, setImportText] = useState('');
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importSuccess, setImportSuccess] = useState<string | null>(null);
+  const {
+    data: projectWorkItemTypes = FALLBACK_WORK_ITEM_TYPES,
+    error: workItemTypesError,
+  } = useQuery({
+    queryKey: ['project-work-item-types'],
+    queryFn: async () => {
+      const types = await workItemMetadataService.getWorkItemTypes();
+      return types.map((type) => type.name);
+    },
+    staleTime: 5 * 60 * 1000,
+  });
 
   // Initialize store with data
   useEffect(() => {
@@ -70,6 +87,24 @@ export function TemplateEditor({
     const isValid = await validate();
     if (isValid && templateSetup) {
       onSave(templateSetup);
+    }
+  };
+
+  const handleImportTemplates = () => {
+    try {
+      const templates = parseTemplateImport(importText);
+      const result = importTemplates(templates);
+      setImportError(null);
+      setImportSuccess(
+        `Imported ${result.importedNames.length} template${
+          result.importedNames.length === 1 ? '' : 's'
+        }: ${result.importedNames.join(', ')}`
+      );
+      setImportText('');
+      setIsImportOpen(false);
+    } catch (error) {
+      setImportSuccess(null);
+      setImportError((error as Error).message);
     }
   };
 
@@ -119,12 +154,25 @@ export function TemplateEditor({
         </MessageBar>
       )}
 
+      {importSuccess && (
+        <MessageBar severity={MessageBarSeverity.Success}>
+          {importSuccess}
+        </MessageBar>
+      )}
+
+      {workItemTypesError && (
+        <MessageBar severity={MessageBarSeverity.Warning}>
+          Project work item metadata could not be loaded. The editor is using a
+          fallback work item type list, and field suggestions may be incomplete.
+        </MessageBar>
+      )}
+
       <div className="template-editor__templates">
         {templateSetup.templates.map((template, templateIndex) => (
           <TemplateItem
             key={templateIndex}
             template={template}
-            availableWorkItemTypes={ALL_WORK_ITEM_TYPES}
+            availableWorkItemTypes={projectWorkItemTypes}
             onUpdateName={(name) => updateTemplateName(templateIndex, name)}
             onRemove={() => removeTemplate(templateIndex)}
             onAddTask={() => addTask(templateIndex)}
@@ -159,11 +207,22 @@ export function TemplateEditor({
       </div>
 
       <div className="template-editor__actions">
-        <Button
-          text="Add Template"
-          iconProps={{ iconName: 'Add' }}
-          onClick={addTemplate}
-        />
+        <ButtonGroup>
+          <Button
+            text="Add Template"
+            iconProps={{ iconName: 'Add' }}
+            onClick={addTemplate}
+          />
+          <Button
+            text="Add Template via JSON"
+            iconProps={{ iconName: 'Paste' }}
+            onClick={() => {
+              setIsImportOpen((current) => !current);
+              setImportError(null);
+              setImportSuccess(null);
+            }}
+          />
+        </ButtonGroup>
         <ButtonGroup>
           <Button
             text={isSaving ? 'Saving...' : 'Save'}
@@ -174,6 +233,56 @@ export function TemplateEditor({
           />
         </ButtonGroup>
       </div>
+
+      {isImportOpen && (
+        <div className="template-editor__import-panel">
+          <h3>Add Template via JSON</h3>
+          <p>
+            Paste a single template object or a full template setup. Imported
+            templates are merged into the current project configuration.
+          </p>
+
+          {importError && (
+            <MessageBar severity={MessageBarSeverity.Error}>
+              {importError}
+            </MessageBar>
+          )}
+
+          <textarea
+            value={importText}
+            onChange={(event) => {
+              setImportText(event.target.value);
+              setImportError(null);
+            }}
+            className="template-editor__import-textarea"
+            placeholder={`{
+  "name": "Imported Template",
+  "tasks": [
+    {
+      "name": "Task Name",
+      "fields": [{ "name": "System.Title", "value": "Example" }]
+    }
+  ]
+}`}
+            spellCheck={false}
+          />
+
+          <div className="template-editor__import-actions">
+            <Button
+              text="Cancel"
+              onClick={() => {
+                setIsImportOpen(false);
+                setImportError(null);
+              }}
+            />
+            <Button
+              text="Import Template"
+              primary
+              onClick={handleImportTemplates}
+            />
+          </div>
+        </div>
+      )}
 
       <div className="template-editor__help">
         <h3>Available Field Variables</h3>

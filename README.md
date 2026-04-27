@@ -4,9 +4,9 @@
 
 This Azure DevOps extension enables creating child tasks from predefined templates directly from work items (User Stories, Bugs, etc.).
 
-## 🚀 Version 3.0.0 - Modern Architecture
+## 🚀 Version 3.0.24 - Modern Architecture
 
-Version 3.0.0 represents a complete architectural modernization of the extension:
+Version 3.0.24 ships the modern Azure DevOps extension built from `src-modern/`:
 
 ### Major Changes
 
@@ -102,7 +102,7 @@ ChildTasksTemplate/
 
 ### Prerequisites
 
-- **Node.js** 18+ (tested with 22.21.1)
+- **Node.js** 20+
 - **npm** 10+
 - **Git**
 
@@ -113,11 +113,8 @@ ChildTasksTemplate/
 git clone <repository-url>
 cd ChildTasksTemplate
 
-# Checkout the modern architecture branch
-git checkout feature/modern-architecture-vite-react18-01UmWasX5L7PHXkQte1noLxs
-
-# Install dependencies (use --legacy-peer-deps due to azure-devops-ui React 16 peer dependency)
-npm install --legacy-peer-deps
+# Install dependencies
+npm install
 ```
 
 ## 🚀 Development
@@ -191,7 +188,7 @@ This will:
 1. Compile TypeScript
 2. Bundle with Vite (production mode)
 3. Copy documentation assets
-4. Create `bin/Fiveforty.ChildTasksTemplate-3.0.0.vsix`
+4. Create `bin/Fiveforty.ChildTasksTemplate-3.0.24.vsix`
 
 ### Upload to Marketplace
 
@@ -204,7 +201,8 @@ This will:
 ### 1. Template Configuration
 - **Location**: Project Settings > Child Tasks Template
 - Define multiple templates with custom fields
-- JSON-based configuration with schema validation
+- Visual editor plus JSON-based configuration with schema validation
+- Add a new template by pasting JSON directly in the modern editor
 - Supports field interpolation using parent work item data
 
 ### 2. Add Tasks Action
@@ -226,6 +224,12 @@ This will:
 - Preserves field values as strings (fixes 8h → 80h bug)
 - French comma notation support (8,5h)
 
+### 5. Project-Aware Field Metadata
+- Field suggestions are loaded from Azure DevOps project metadata
+- Suggestions adapt to the selected child work item type
+- Already-used fields in the current task are filtered out from the field picker
+- Picklist fields can expose their allowed values in the value suggestions
+
 ## 🔧 Configuration
 
 ### Template Schema
@@ -234,7 +238,7 @@ Templates are configured in JSON format:
 
 ```json
 {
-  "version": 1,
+  "version": 3,
   "templates": [
     {
       "name": "Development Tasks",
@@ -279,7 +283,7 @@ See [Template Schema Sample](src-modern/core/utils/templateSetupSample.json) for
 
 ### Data Migration
 
-Template data is **automatically upgraded** from version 1 to version 2 schema using `SettingsUpgrade` utility. No manual migration needed.
+Legacy stored template data is upgraded to the current schema on load. The modern service also reads the previous project settings key and migrates it forward automatically when legacy data is found.
 
 ### Configuration Files
 
@@ -288,16 +292,15 @@ If you have custom webpack configurations or build scripts, they need to be upda
 - `webpack.config.js` → `vite.config.ts`
 - Update npm scripts in `package.json`
 
-## 🐛 Bug Fixes in 3.0.0
+## 🐛 Recent Fixes
 
 ### Original Estimate Bug (8h → 80h)
 
 **Issue**: JSON editor was converting "8h" to number 8, then to "80" in some locales (French).
 
-**Fix**: `SettingsUpgrade.preserveFieldValues()` ensures all field values stay as strings with proper locale formatting:
-- Location: `src-modern/core/utils/settings-upgrade.ts`
-- Handles French comma notation (8,5 → "8,5h")
-- Handles English dot notation (8.5 → "8.5h")
+**Fix**: the modern extension preserves template field values as strings in settings and normalizes numeric Azure DevOps work item fields only at creation time:
+- Settings normalization: `src-modern/core/utils/settings-upgrade.ts`
+- Task creation normalization: `src-modern/core/services/childTasks.service.ts`
 
 ## 🧪 Testing
 
@@ -321,9 +324,8 @@ npm run test:coverage
 
 ```
 src-modern/
-└── **/__tests__/          # Test files
-    ├── *.test.ts         # Unit tests
-    └── *.test.tsx        # Component tests
+├── **/*.test.ts          # Unit tests
+└── **/*.test.tsx         # Component tests
 ```
 
 ## 📚 Documentation

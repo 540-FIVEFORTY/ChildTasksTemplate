@@ -9,6 +9,8 @@ vi.mock('azure-devops-extension-sdk', () => ({
   ready: vi.fn().mockResolvedValue(undefined),
   notifyLoadSucceeded: vi.fn(),
   register: vi.fn(),
+  getAccessToken: vi.fn().mockResolvedValue('test-access-token'),
+  getHost: vi.fn().mockReturnValue({ name: 'test-org' }),
   getContributionId: vi.fn().mockReturnValue('test-contribution-id'),
   getService: vi.fn(),
   getExtensionContext: vi.fn().mockReturnValue({

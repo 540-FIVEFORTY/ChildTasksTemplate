@@ -7,9 +7,19 @@ import { Button } from 'azure-devops-ui/Button';
 import { Dropdown } from 'azure-devops-ui/Dropdown';
 import { DropdownSelection } from 'azure-devops-ui/Utilities/DropdownSelection';
 import type { Field, FieldType } from '@core/models';
+import type { WorkItemFieldInfo } from '@core/services';
+
+interface FieldSuggestion {
+  name: string;
+  description: string;
+  type: FieldType;
+  helpText?: string;
+  allowedValues?: string[];
+}
 
 interface FieldItemProps {
   field: Field;
+  availableFields: WorkItemFieldInfo[];
   existingFieldNames: string[]; // Names of other fields in the same task (for duplicate check)
   onUpdateName: (name: string) => void;
   onUpdateValue: (value: string) => void;
@@ -17,8 +27,7 @@ interface FieldItemProps {
   onRemove: () => void;
 }
 
-// Common Azure DevOps field names for autocomplete
-const COMMON_FIELDS = [
+const FALLBACK_FIELDS: FieldSuggestion[] = [
   // System fields
   { name: 'System.Title', description: 'Title', type: 'text' as const },
   { name: 'System.Description', description: 'Description', type: 'text' as const },
@@ -149,8 +158,63 @@ const TYPE_OPTIONS = [
   { id: 'number', text: 'Number' },
 ];
 
+function metadataTypeToFieldType(type?: string): FieldType {
+  return type === 'integer' || type === 'double' ? 'number' : 'text';
+}
+
+function normalizeAllowedValues(values?: unknown[]): string[] | undefined {
+  if (!Array.isArray(values) || values.length === 0) {
+    return undefined;
+  }
+
+  const normalized = values
+    .map((value) => {
+      if (
+        typeof value === 'string' ||
+        typeof value === 'number' ||
+        typeof value === 'boolean'
+      ) {
+        return String(value);
+      }
+
+      if (value && typeof value === 'object') {
+        const record = value as Record<string, unknown>;
+
+        if (
+          typeof record.name === 'string' ||
+          typeof record.name === 'number' ||
+          typeof record.name === 'boolean'
+        ) {
+          return String(record.name);
+        }
+
+        if (
+          typeof record.value === 'string' ||
+          typeof record.value === 'number' ||
+          typeof record.value === 'boolean'
+        ) {
+          return String(record.value);
+        }
+
+        if (
+          typeof record.displayName === 'string' ||
+          typeof record.displayName === 'number' ||
+          typeof record.displayName === 'boolean'
+        ) {
+          return String(record.displayName);
+        }
+      }
+
+      return JSON.stringify(value);
+    })
+    .filter((value) => value.length > 0);
+
+  return normalized.length > 0 ? normalized : undefined;
+}
+
 export function FieldItem({
   field,
+  availableFields,
   existingFieldNames,
   onUpdateName,
   onUpdateValue,
@@ -158,6 +222,7 @@ export function FieldItem({
   onRemove,
 }: FieldItemProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showValueSuggestions, setShowValueSuggestions] = useState(false);
   const [searchText, setSearchText] = useState(field.name);
   const nameInputRef = useRef<HTMLDivElement>(null);
 
@@ -169,16 +234,61 @@ export function FieldItem({
     );
   }, [field.name, existingFieldNames]);
 
+  const availableFieldOptions = useMemo(() => {
+    if (availableFields.length === 0) {
+      return FALLBACK_FIELDS;
+    }
+
+    return availableFields.map((availableField): FieldSuggestion => ({
+      name: availableField.referenceName,
+      description: availableField.name,
+      type: metadataTypeToFieldType(availableField.type),
+      helpText: availableField.helpText,
+      allowedValues: normalizeAllowedValues(availableField.allowedValues),
+    }));
+  }, [availableFields]);
+
+  const selectedFieldOption = useMemo(
+    () =>
+      availableFieldOptions.find(
+        (availableField) =>
+          availableField.name.toLowerCase() === field.name.toLowerCase()
+      ),
+    [availableFieldOptions, field.name]
+  );
+
   // Filter suggestions based on input
   const filteredSuggestions = useMemo(() => {
-    if (!searchText) return COMMON_FIELDS;
+    if (!searchText) return availableFieldOptions;
     const lower = searchText.toLowerCase();
-    return COMMON_FIELDS.filter(
+    return availableFieldOptions.filter(
       (f) =>
-        f.name.toLowerCase().includes(lower) ||
-        f.description.toLowerCase().includes(lower)
+        !existingFieldNames.some(
+          (name) => name.toLowerCase() === f.name.toLowerCase()
+        ) &&
+        (
+          f.name.toLowerCase().includes(lower) ||
+          f.description.toLowerCase().includes(lower)
+        )
     );
-  }, [searchText]);
+  }, [availableFieldOptions, existingFieldNames, searchText]);
+
+  const filteredValueSuggestions = useMemo(() => {
+    const allowedValues = selectedFieldOption?.allowedValues;
+    if (!allowedValues || allowedValues.length === 0) {
+      return [];
+    }
+
+    const currentValue = (field.value || '').toLowerCase();
+
+    if (!currentValue) {
+      return allowedValues;
+    }
+
+    return allowedValues.filter((value) =>
+      value.toLowerCase().includes(currentValue)
+    );
+  }, [field.value, selectedFieldOption?.allowedValues]);
 
   // Handle name input change
   const handleNameChange = useCallback((_: unknown, value: string) => {
@@ -188,15 +298,15 @@ export function FieldItem({
   }, [onUpdateName]);
 
   // Handle suggestion selection
-  const handleSuggestionSelect = useCallback((suggestion: typeof COMMON_FIELDS[0]) => {
-    setSearchText(suggestion.name);
-    onUpdateName(suggestion.name);
-    // Auto-set type based on suggestion
-    if (suggestion.type === 'number' && !isNumericField(suggestion.name)) {
-      onUpdateType('number');
-    }
-    setShowSuggestions(false);
-  }, [onUpdateName, onUpdateType]);
+  const handleSuggestionSelect = useCallback(
+    (suggestion: FieldSuggestion) => {
+      setSearchText(suggestion.name);
+      onUpdateName(suggestion.name);
+      onUpdateType(suggestion.type);
+      setShowSuggestions(false);
+    },
+    [onUpdateName, onUpdateType]
+  );
 
   // Normalize on blur only
   const handleValueBlur = () => {
@@ -206,8 +316,20 @@ export function FieldItem({
     }
   };
 
+  const handleValueSuggestionSelect = useCallback(
+    (value: string) => {
+      onUpdateValue(value);
+      setShowValueSuggestions(false);
+    },
+    [onUpdateValue]
+  );
+
   // Check if this is a known numeric field
-  const isKnownNumeric = useMemo(() => isNumericField(field.name), [field.name]);
+  const isKnownNumeric = useMemo(
+    () =>
+      selectedFieldOption?.type === 'number' || isNumericField(field.name),
+    [field.name, selectedFieldOption?.type]
+  );
 
   // Check if this field should be validated as numeric (known OR user-selected)
   const isNumeric = useMemo(
@@ -217,8 +339,8 @@ export function FieldItem({
 
   // Show type selector only for unknown fields
   const showTypeSelector = useMemo(
-    () => field.name.trim() !== '' && !isKnownNumeric,
-    [field.name, isKnownNumeric]
+    () => field.name.trim() !== '' && !selectedFieldOption && !isKnownNumeric,
+    [field.name, isKnownNumeric, selectedFieldOption]
   );
 
   const hasInvalidValue = useMemo(
@@ -275,20 +397,46 @@ export function FieldItem({
                   onMouseDown={() => handleSuggestionSelect(suggestion)}
                 >
                   <span className="field-item__suggestion-name">{suggestion.name}</span>
-                  <span className="field-item__suggestion-desc">{suggestion.description}</span>
+                  <span className="field-item__suggestion-desc">
+                    {suggestion.description}
+                    {suggestion.helpText ? ` - ${suggestion.helpText}` : ''}
+                  </span>
                 </div>
               ))}
             </div>
           )}
         </div>
         <div style={valueErrorStyle}>
-          <TextField
-            value={field.value || ''}
-            onChange={(_, value) => onUpdateValue(value)}
-            onBlur={handleValueBlur}
-            placeholder="Value (e.g. 8 or {System.IterationPath})"
-            className="field-item__value"
-          />
+          <div className="field-item__value-container">
+            <TextField
+              value={field.value || ''}
+              onChange={(_, value) => onUpdateValue(value)}
+              onBlur={() => {
+                handleValueBlur();
+                setTimeout(() => setShowValueSuggestions(false), 200);
+              }}
+              onFocus={() => setShowValueSuggestions(true)}
+              placeholder={
+                selectedFieldOption?.allowedValues?.length
+                  ? 'Select a value or type one manually'
+                  : 'Value (e.g. 8 or {System.IterationPath})'
+              }
+              className="field-item__value"
+            />
+            {showValueSuggestions && filteredValueSuggestions.length > 0 && (
+              <div className="field-item__suggestions field-item__suggestions--value">
+                {filteredValueSuggestions.map((value) => (
+                  <div
+                    key={value}
+                    className="field-item__suggestion"
+                    onMouseDown={() => handleValueSuggestionSelect(value)}
+                  >
+                    <span className="field-item__suggestion-name">{value}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
         {showTypeSelector && (
           <Dropdown
@@ -315,6 +463,14 @@ export function FieldItem({
           This field requires a numeric value
         </div>
       )}
+      {selectedFieldOption?.allowedValues &&
+        selectedFieldOption.allowedValues.length > 0 && (
+          <div className="field-item__hint">
+            {selectedFieldOption.allowedValues.length} allowed value
+            {selectedFieldOption.allowedValues.length === 1 ? '' : 's'} available
+            for this field.
+          </div>
+        )}
     </div>
   );
 }

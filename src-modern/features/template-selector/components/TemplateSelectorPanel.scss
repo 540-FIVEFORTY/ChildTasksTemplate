@@ -33,6 +33,20 @@
     margin-bottom: 20px;
   }
 
+  &__result {
+    margin-bottom: 16px;
+  }
+
+  &__result-detail {
+    margin-top: 8px;
+    font-size: 13px;
+  }
+
+  &__result-list {
+    margin: 8px 0 0 20px;
+    padding: 0;
+  }
+
   &__actions {
     display: flex;
     justify-content: flex-end;

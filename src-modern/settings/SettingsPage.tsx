@@ -19,6 +19,7 @@ export function SettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [initialData, setInitialData] = useState<TemplateSetup | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [jsonMode, setJsonMode] = useState(false);
   const [jsonText, setJsonText] = useState('');
   const [jsonError, setJsonError] = useState<string | null>(null);
@@ -38,10 +39,12 @@ export function SettingsPage() {
 
   const loadSetup = async () => {
     try {
+      setLoadError(null);
       const data = await templateService.getTemplateSetup();
       setInitialData(data);
     } catch (error) {
       console.error('Failed to load setup:', error);
+      setLoadError((error as Error).message);
     } finally {
       setIsLoading(false);
     }
@@ -131,6 +134,19 @@ export function SettingsPage() {
     return (
       <div className="settings-page settings-page--loading">
         <Spinner size={SpinnerSize.large} label="Initializing..." />
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="settings-page">
+        <MessageBar severity={MessageBarSeverity.Error}>
+          Failed to load template configuration: {loadError}
+        </MessageBar>
+        <div className="settings-page__actions">
+          <Button text="Retry" primary onClick={loadSetup} />
+        </div>
       </div>
     );
   }

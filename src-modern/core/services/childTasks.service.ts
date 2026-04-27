@@ -22,6 +22,25 @@ interface JsonPatchOperation {
     from?: string
 }
 
+export interface ChildTaskExecutionItem {
+    templateName: string
+    taskName: string
+    workItemType: string
+    status: "success" | "failed"
+    workItemId?: number
+    errorMessage?: string
+}
+
+export interface ChildTaskExecutionResult {
+    status: "success" | "partial" | "failed"
+    attemptedCount: number
+    createdCount: number
+    failedCount: number
+    createdWorkItemIds: number[]
+    items: ChildTaskExecutionItem[]
+    errorMessage?: string
+}
+
 export class ChildTasksService {
     templates: Template[]
     private baseUrl: string = ""
@@ -151,25 +170,40 @@ export class ChildTasksService {
         }
     }
 
-    public async execute(context: any): Promise<void> {
+    public async execute(context: any): Promise<ChildTaskExecutionResult> {
         console.log("[ChildTasksService] execute called with context:", context)
 
-        if (!this.templates) {
+        if (!this.templates || this.templates.length === 0) {
             console.warn("[ChildTasksService] Template is undefined or has an incorrect format.")
-            return
+            return ChildTasksService.createResult({
+                errorMessage: "No templates were selected.",
+            })
         }
 
         if (!context.workItemAvailable) {
             console.warn("[ChildTasksService] Work item not available in context")
-            return
+            return ChildTasksService.createResult({
+                errorMessage: "The selected work item is not available in the current context.",
+            })
         }
 
         const projectId = context.currentProjectGuid
         const workItemId = context.workItemId
+        const results: ChildTaskExecutionItem[] = []
 
-        console.log("[ChildTasksService] Getting parent work item:", workItemId)
-        const parent = await this.getWorkItem(projectId, workItemId)
-        console.log("[ChildTasksService] Parent work item:", parent)
+        let parent: WorkItem
+
+        try {
+            console.log("[ChildTasksService] Getting parent work item:", workItemId)
+            parent = await this.getWorkItem(projectId, workItemId)
+            console.log("[ChildTasksService] Parent work item:", parent)
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : "Unknown error"
+            console.error("[ChildTasksService] Failed to load parent work item:", error)
+            return ChildTasksService.createResult({
+                errorMessage: `Failed to load the parent work item: ${errorMessage}`,
+            })
+        }
 
         for (let t = 0; t < this.templates.length; t++) {
             const template = this.templates[t]
@@ -211,14 +245,32 @@ export class ChildTasksService {
                 try {
                     const workItem = await this.createWorkItem(projectId, workItemType, patch)
                     console.info("[ChildTasksService] Created work item", workItem.id, "Type:", workItemType)
+                    results.push({
+                        templateName: template.name,
+                        taskName: task.name,
+                        workItemType,
+                        status: "success",
+                        workItemId: workItem.id,
+                    })
                 } catch (error) {
+                    const errorMessage =
+                        error instanceof Error ? error.message : "Unknown error"
                     console.error("[ChildTasksService] Failed to create work item:", error)
-                    throw error
+                    results.push({
+                        templateName: template.name,
+                        taskName: task.name,
+                        workItemType,
+                        status: "failed",
+                        errorMessage,
+                    })
                 }
             }
         }
 
         console.log("[ChildTasksService] All tasks created successfully")
+        return ChildTasksService.createResult({
+            items: results,
+        })
     }
 
     private static interpolate(text: string | null | undefined, parent: WorkItem): string | null {
@@ -260,6 +312,54 @@ export class ChildTasksService {
             )
         } else {
             obj[fieldName] = value
+        }
+    }
+
+    private static createResult({
+        items = [],
+        errorMessage,
+    }: {
+        items?: ChildTaskExecutionItem[]
+        errorMessage?: string
+    }): ChildTaskExecutionResult {
+        const createdWorkItemIds = items
+            .filter((item) => item.status === "success" && item.workItemId !== undefined)
+            .map((item) => item.workItemId as number)
+        const failedCount = items.filter((item) => item.status === "failed").length
+        const createdCount = createdWorkItemIds.length
+        const attemptedCount = items.length
+
+        if (errorMessage && attemptedCount === 0) {
+            return {
+                status: "failed",
+                attemptedCount,
+                createdCount,
+                failedCount,
+                createdWorkItemIds,
+                items,
+                errorMessage,
+            }
+        }
+
+        if (failedCount === 0) {
+            return {
+                status: "success",
+                attemptedCount,
+                createdCount,
+                failedCount,
+                createdWorkItemIds,
+                items,
+            }
+        }
+
+        return {
+            status: createdCount > 0 ? "partial" : "failed",
+            attemptedCount,
+            createdCount,
+            failedCount,
+            createdWorkItemIds,
+            items,
+            errorMessage,
         }
     }
 }

@@ -2,7 +2,10 @@
  * Hook for task creation
  */
 import { useMutation } from '@tanstack/react-query';
-import { ChildTasksService } from '@core/services/childTasks.service';
+import {
+  ChildTasksService,
+  type ChildTaskExecutionResult,
+} from '@core/services/childTasks.service';
 import { templateService } from '@core/services';
 
 interface CreateTasksParams {
@@ -20,7 +23,9 @@ export function useTaskCreation() {
   });
 
   return {
-    createTasks: mutateAsync,
+    createTasks: mutateAsync as (
+      params: CreateTasksParams
+    ) => Promise<ChildTaskExecutionResult>,
     isCreating: isPending,
   };
 }

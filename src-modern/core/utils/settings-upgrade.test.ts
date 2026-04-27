@@ -3,7 +3,6 @@
  */
 import { describe, it, expect } from 'vitest';
 import { SettingsUpgrade } from './settings-upgrade';
-import type { Task } from '../models/Task';
 import type { TemplateSetup } from '../models/TemplateSetup';
 
 describe('SettingsUpgrade', () => {
@@ -12,7 +11,7 @@ describe('SettingsUpgrade', () => {
       const result = SettingsUpgrade.upgradeToCurrent(null);
 
       expect(result).toBeDefined();
-      expect(result.version).toBe(2);
+      expect(result.version).toBe(3);
       expect(result.templates).toBeDefined();
       expect(Array.isArray(result.templates)).toBe(true);
     });
@@ -21,10 +20,28 @@ describe('SettingsUpgrade', () => {
       const result = SettingsUpgrade.upgradeToCurrent(undefined);
 
       expect(result).toBeDefined();
-      expect(result.version).toBe(2);
+      expect(result.version).toBe(3);
     });
 
-    it('should upgrade v1 format (tasks array) to v2 format', () => {
+    it('should parse stored JSON strings', () => {
+      const result = SettingsUpgrade.upgradeToCurrent(
+        JSON.stringify({
+          version: 3,
+          templates: [
+            {
+              name: 'Imported',
+              tasks: [{ name: 'Task A', fields: [] }],
+            },
+          ],
+        })
+      );
+
+      expect(result.version).toBe(3);
+      expect(result.templates).toHaveLength(1);
+      expect(result.templates[0].name).toBe('Imported');
+    });
+
+    it('should upgrade legacy tasks array format to the current schema', () => {
       const v1Config = {
         tasks: [
           {
@@ -36,36 +53,17 @@ describe('SettingsUpgrade', () => {
 
       const result = SettingsUpgrade.upgradeToCurrent(v1Config);
 
-      expect(result.version).toBe(2);
+      expect(result.version).toBe(3);
       expect(result.templates).toHaveLength(1);
       expect(result.templates[0].name).toBe('default');
-      expect(result.templates[0].tasks).toEqual(v1Config.tasks);
+      expect(result.templates[0].tasks[0].name).toBe('Task 1');
+      expect(result.templates[0].tasks[0].fields).toEqual([
+        { name: 'System.Title', value: 'Test', type: undefined },
+      ]);
+      expect(result.templates[0].tasks[0].workItemType).toBe('Task');
     });
 
-    it('should upgrade config with version < 2', () => {
-      const oldConfig = {
-        version: 1,
-        tasks: [
-          {
-            name: 'Design Task',
-            fields: [{ name: 'System.Title', value: '{System.Title} Design' }],
-          },
-          {
-            name: 'Dev Task',
-            fields: [{ name: 'System.Title', value: '{System.Title} Dev' }],
-          },
-        ],
-      };
-
-      const result = SettingsUpgrade.upgradeToCurrent(oldConfig);
-
-      expect(result.version).toBe(2);
-      expect(result.templates).toHaveLength(1);
-      expect(result.templates[0].name).toBe('default');
-      expect(result.templates[0].tasks).toHaveLength(2);
-    });
-
-    it('should return v2 config unchanged', () => {
+    it('should upgrade legacy template-based configs to the current version', () => {
       const v2Config: TemplateSetup = {
         version: 2,
         templates: [
@@ -92,8 +90,56 @@ describe('SettingsUpgrade', () => {
 
       const result = SettingsUpgrade.upgradeToCurrent(v2Config);
 
-      expect(result).toEqual(v2Config);
+      expect(result.version).toBe(3);
       expect(result.templates).toHaveLength(2);
+      expect(result.templates[0].name).toBe('template1');
+      expect(result.templates[1].name).toBe('template2');
+      expect(result.templates[0].tasks[0].workItemType).toBe('Task');
+    });
+
+    it('should return current version config unchanged', () => {
+      const v3Config: TemplateSetup = {
+        version: 3,
+        templates: [
+          {
+            name: 'template1',
+            tasks: [
+              {
+                name: 'Task A',
+                workItemType: 'Bug',
+                fields: [{ name: 'System.Title', value: 'A' }],
+              },
+            ],
+          },
+          {
+            name: 'template2',
+            tasks: [
+              {
+                name: 'Task B',
+                fields: [{ name: 'System.Title', value: 'B' }],
+              },
+            ],
+          },
+        ],
+      };
+
+      const result = SettingsUpgrade.upgradeToCurrent(v3Config);
+
+      expect(result.version).toBe(3);
+      expect(result.templates).toHaveLength(2);
+      expect(result.templates[0].tasks[0].workItemType).toBe('Bug');
+      expect(result.templates[1].tasks[0].workItemType).toBe('Task');
+      expect(result.templates[0].tasks[0].fields[0]).toEqual({
+        name: 'System.Title',
+        value: 'A',
+        type: undefined,
+      });
+    });
+
+    it('should throw for invalid stored JSON strings', () => {
+      expect(() => SettingsUpgrade.upgradeToCurrent('{invalid-json}')).toThrow(
+        'Invalid template setup JSON'
+      );
     });
   });
 
@@ -115,14 +161,16 @@ describe('SettingsUpgrade', () => {
       const result = SettingsUpgrade.getDefaultSetup();
 
       expect(result).toBeDefined();
-      expect(result.version).toBe(2);
+      expect(result.version).toBe(3);
       expect(result.templates).toBeDefined();
       expect(result.templates.length).toBeGreaterThan(0);
     });
 
-    it('should return setup with default template containing tasks', () => {
+    it('should return the shipped sample template containing tasks', () => {
       const result = SettingsUpgrade.getDefaultSetup();
-      const defaultTemplate = result.templates.find((t) => t.name === 'default');
+      const defaultTemplate = result.templates.find(
+        (t) => t.name === 'Development'
+      );
 
       expect(defaultTemplate).toBeDefined();
       expect(defaultTemplate!.tasks.length).toBeGreaterThan(0);
