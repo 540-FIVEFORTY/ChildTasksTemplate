@@ -59,6 +59,7 @@ export function TemplateItem({
           {template.tasks.length} task{template.tasks.length !== 1 ? 's' : ''}
         </span>
         <Button
+          text="Remove template"
           iconProps={{ iconName: 'Delete' }}
           subtle
           danger

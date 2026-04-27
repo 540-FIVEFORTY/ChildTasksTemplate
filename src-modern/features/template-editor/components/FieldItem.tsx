@@ -4,6 +4,9 @@
 import { useMemo, useState, useRef, useCallback } from 'react';
 import { TextField } from 'azure-devops-ui/TextField';
 import { Button } from 'azure-devops-ui/Button';
+import { Dropdown } from 'azure-devops-ui/Dropdown';
+import { DropdownSelection } from 'azure-devops-ui/Utilities/DropdownSelection';
+import type { IListBoxItem } from 'azure-devops-ui/ListBox';
 import type { Field, FieldType } from '@core/models';
 import type { WorkItemFieldInfo } from '@core/services';
 import { describeExpectedFieldFormat } from '@core/utils';
@@ -285,6 +288,26 @@ export function FieldItem({
     );
   }, [field.value, selectedFieldOption?.allowedValues]);
 
+  const allowedValueItems = useMemo<IListBoxItem[]>(
+    () =>
+      selectedFieldOption?.allowedValues?.map((value) => ({
+        id: value,
+        text: value,
+      })) ?? [],
+    [selectedFieldOption?.allowedValues]
+  );
+
+  const allowedValueSelection = useMemo(() => {
+    const selection = new DropdownSelection();
+    const index = allowedValueItems.findIndex((item) => item.id === field.value);
+
+    if (index >= 0) {
+      selection.select(index);
+    }
+
+    return selection;
+  }, [allowedValueItems, field.value]);
+
   // Handle name input change
   const handleNameChange = useCallback((_: unknown, value: string) => {
     setSearchText(value);
@@ -315,6 +338,13 @@ export function FieldItem({
     (value: string) => {
       onUpdateValue(value);
       setShowValueSuggestions(false);
+    },
+    [onUpdateValue]
+  );
+
+  const handleAllowedValueSelect = useCallback(
+    (_event: React.SyntheticEvent<HTMLElement>, item: IListBoxItem<{}>) => {
+      onUpdateValue(String(item.id));
     },
     [onUpdateValue]
   );
@@ -353,6 +383,18 @@ export function FieldItem({
   }, [field.value, selectedFieldOption?.allowedValues]);
 
   const hasInvalidValue = hasInvalidNumericValue || hasInvalidAllowedValue;
+
+  const expectedFormat = useMemo(() => {
+    if (selectedFieldOption?.metadata) {
+      return describeExpectedFieldFormat(selectedFieldOption.metadata);
+    }
+
+    if (isNumeric) {
+      return 'Decimal number';
+    }
+
+    return 'Text or parent-field value';
+  }, [isNumeric, selectedFieldOption?.metadata]);
 
   const valueErrorStyle: React.CSSProperties = hasInvalidValue
     ? {
@@ -401,34 +443,42 @@ export function FieldItem({
           )}
         </div>
         <div style={valueErrorStyle}>
-          <div className="field-item__value-container">
-            <TextField
-              value={field.value || ''}
-              onChange={(_, value) => onUpdateValue(value)}
-              onBlur={() => {
-                handleValueBlur();
-                setTimeout(() => setShowValueSuggestions(false), 200);
-              }}
-              onFocus={() => setShowValueSuggestions(true)}
-              placeholder={
-                selectedFieldOption?.allowedValues?.length
-                  ? 'Select a valid value or use {Parent.Field}'
-                  : 'Value (e.g. 8 or {System.IterationPath})'
-              }
-              className="field-item__value"
-            />
-            {showValueSuggestions && filteredValueSuggestions.length > 0 && (
-              <div className="field-item__suggestions field-item__suggestions--value">
-                {filteredValueSuggestions.map((value) => (
-                  <div
-                    key={value}
-                    className="field-item__suggestion"
-                    onMouseDown={() => handleValueSuggestionSelect(value)}
-                  >
-                    <span className="field-item__suggestion-name">{value}</span>
+          <div className="field-item__value-container" title={`Expected format: ${expectedFormat}`}>
+            {allowedValueItems.length > 0 ? (
+              <Dropdown
+                items={allowedValueItems}
+                selection={allowedValueSelection}
+                onSelect={handleAllowedValueSelect}
+                placeholder={`Select a value (${expectedFormat})`}
+                className="field-item__value field-item__value-dropdown"
+              />
+            ) : (
+              <>
+                <TextField
+                  value={field.value || ''}
+                  onChange={(_, value) => onUpdateValue(value)}
+                  onBlur={() => {
+                    handleValueBlur();
+                    setTimeout(() => setShowValueSuggestions(false), 200);
+                  }}
+                  onFocus={() => setShowValueSuggestions(true)}
+                  placeholder={`Value (${expectedFormat})`}
+                  className="field-item__value"
+                />
+                {showValueSuggestions && filteredValueSuggestions.length > 0 && (
+                  <div className="field-item__suggestions field-item__suggestions--value">
+                    {filteredValueSuggestions.map((value) => (
+                      <div
+                        key={value}
+                        className="field-item__suggestion"
+                        onMouseDown={() => handleValueSuggestionSelect(value)}
+                      >
+                        <span className="field-item__suggestion-name">{value}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -453,7 +503,7 @@ export function FieldItem({
       )}
       {selectedFieldOption?.metadata && (
         <div className="field-item__hint">
-          Expected format: {describeExpectedFieldFormat(selectedFieldOption.metadata)}
+          Expected format: {expectedFormat}
         </div>
       )}
     </div>

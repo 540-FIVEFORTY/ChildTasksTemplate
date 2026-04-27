@@ -75,17 +75,17 @@ export function TaskItem({
       24
     );
 
-    return `${Math.min(Math.max(longestReferenceName + 6, 28), 56)}ch`;
+    return `${Math.min(Math.max(longestReferenceName + 8, 32), 80)}ch`;
   }, [availableFields]);
 
   const fieldLayoutStyle = useMemo(
     () =>
       ({
-        '--field-name-column-width': `minmax(280px, ${fieldNameColumnWidth})`,
+        '--field-name-column-width': `minmax(320px, ${fieldNameColumnWidth})`,
         '--field-name-suggestions-width': `min(${Math.min(
-          Math.max(parseInt(fieldNameColumnWidth, 10) + 10, 42),
-          72
-        )}ch, calc(100vw - 120px))`,
+          Math.max(parseInt(fieldNameColumnWidth, 10) + 16, 56),
+          112
+        )}ch, calc(100vw - 80px))`,
       }) as CSSProperties,
     [fieldNameColumnWidth]
   );

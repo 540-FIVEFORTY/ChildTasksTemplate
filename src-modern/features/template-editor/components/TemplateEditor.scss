@@ -169,6 +169,7 @@
 
   &__remove {
     flex: 0 0 auto;
+    white-space: nowrap;
   }
 
   &__content {
@@ -222,7 +223,7 @@
   &__fields-header {
     display: grid;
     grid-template-columns:
-      var(--field-name-column-width, minmax(280px, 36ch))
+      var(--field-name-column-width, minmax(320px, 48ch))
       minmax(220px, 1fr)
       32px;
     gap: 8px;
@@ -243,7 +244,7 @@
   &__row {
     display: grid;
     grid-template-columns:
-      var(--field-name-column-width, minmax(280px, 36ch))
+      var(--field-name-column-width, minmax(320px, 48ch))
       minmax(220px, 1fr)
       32px;
     gap: 8px;
@@ -251,7 +252,7 @@
 
     &--with-type {
       grid-template-columns:
-        var(--field-name-column-width, minmax(280px, 36ch))
+        var(--field-name-column-width, minmax(320px, 48ch))
         minmax(220px, 1fr)
         100px
         32px;
@@ -281,8 +282,8 @@
     position: absolute;
     top: 100%;
     left: 0;
-    min-width: var(--field-name-suggestions-width, 42ch);
-    max-width: min(90vw, 72ch);
+    min-width: var(--field-name-suggestions-width, 64ch);
+    max-width: min(calc(100vw - 80px), 112ch);
     background: var(--background-color, #fff);
     border: 1px solid var(--palette-neutral-20, #e0e0e0);
     border-radius: 4px;
