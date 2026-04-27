@@ -140,7 +140,7 @@
 .template-item {
   border: 1px solid var(--palette-neutral-20, #e0e0e0);
   border-radius: 4px;
-  overflow: hidden;
+  overflow: visible;
 
   &__header {
     display: flex;
@@ -195,6 +195,7 @@
   background: var(--palette-neutral-2, #fafafa);
   border: 1px solid var(--palette-neutral-10, #e8e8e8);
   border-radius: 4px;
+  overflow: visible;
 
   &__header {
     display: flex;
@@ -242,6 +243,10 @@
 
 .field-item {
   margin-bottom: 8px;
+
+  &--name-suggestions-open {
+    padding-bottom: clamp(280px, calc(100vh - 220px), 520px);
+  }
 
   &__row {
     display: grid;
@@ -291,7 +296,7 @@
     border-radius: 4px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     z-index: 1000;
-    max-height: 300px;
+    max-height: clamp(280px, calc(100vh - 220px), 520px);
     overflow-y: auto;
 
     &--value {

@@ -126,4 +126,15 @@ describe('describeExpectedFieldFormat', () => {
     expect(describeExpectedFieldFormat(taskFields[4])).toBe('Date');
     expect(describeExpectedFieldFormat({ name: 'Title', referenceName: 'System.Title', type: 'string' })).toBe('Text');
   });
+
+  it('ignores Azure DevOps empty picklist placeholders', () => {
+    expect(
+      describeExpectedFieldFormat({
+        name: 'Integration Build',
+        referenceName: 'Microsoft.VSTS.Build.IntegrationBuild',
+        type: 'string',
+        allowedValues: ['<None>'],
+      })
+    ).toBe('Text');
+  });
 });

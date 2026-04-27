@@ -1,7 +1,7 @@
 {
 	"manifestVersion": 1,
 	"id": "ChildTasksTemplate-Dev",
-	"version": "3.0.28",
+	"version": "3.0.30",
 	"name": "Child Tasks Template (Dev)",
 	"public": false,
 	"publisher": "Fiveforty",

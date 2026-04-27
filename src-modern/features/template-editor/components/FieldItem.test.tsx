@@ -48,4 +48,36 @@ describe('FieldItem', () => {
       container.querySelector('.field-item__value input[type="text"]')
     ).toBeNull();
   });
+
+  it('uses free text when Azure DevOps only returns the empty picklist placeholder', () => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = createRoot(container);
+
+    act(() => {
+      root.render(
+        <FieldItem
+          field={{ name: 'Microsoft.VSTS.Build.IntegrationBuild', value: '' }}
+          availableFields={[
+            {
+              name: 'Integration Build',
+              referenceName: 'Microsoft.VSTS.Build.IntegrationBuild',
+              type: 'string',
+              allowedValues: ['<None>'],
+            },
+          ]}
+          existingFieldNames={[]}
+          onUpdateName={vi.fn()}
+          onUpdateValue={vi.fn()}
+          onUpdateType={vi.fn()}
+          onRemove={vi.fn()}
+        />
+      );
+    });
+
+    expect(container.querySelector('.field-item__value-dropdown')).toBeNull();
+    expect(
+      container.querySelector('.field-item__value input')
+    ).not.toBeNull();
+  });
 });

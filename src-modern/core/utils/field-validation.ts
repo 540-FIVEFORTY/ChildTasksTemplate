@@ -18,7 +18,9 @@ function normalizeAllowedValues(values?: unknown[]): string[] {
     return [];
   }
 
-  return values.map((value) => String(value));
+  return values
+    .map((value) => String(value))
+    .filter((value) => value.trim().length > 0 && value !== '<None>');
 }
 
 function isValidInteger(value: string): boolean {

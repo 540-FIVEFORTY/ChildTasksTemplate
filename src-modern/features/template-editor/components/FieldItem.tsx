@@ -204,7 +204,7 @@ function normalizeAllowedValues(values?: unknown[]): string[] | undefined {
 
       return JSON.stringify(value);
     })
-    .filter((value) => value.length > 0);
+    .filter((value) => value.trim().length > 0 && value !== '<None>');
 
   return normalized.length > 0 ? normalized : undefined;
 }
@@ -412,8 +412,14 @@ export function FieldItem({
       }
     : {};
 
+  const hasOpenNameSuggestions = showSuggestions && filteredSuggestions.length > 0;
+
   return (
-    <div className="field-item">
+    <div
+      className={`field-item${
+        hasOpenNameSuggestions ? ' field-item--name-suggestions-open' : ''
+      }`}
+    >
       <div className="field-item__row">
         <div className="field-item__name-container" ref={nameInputRef} style={nameErrorStyle}>
           <TextField
@@ -426,7 +432,7 @@ export function FieldItem({
           />
           {showSuggestions && filteredSuggestions.length > 0 && (
             <div className="field-item__suggestions">
-              {filteredSuggestions.slice(0, 8).map((suggestion) => (
+              {filteredSuggestions.slice(0, 12).map((suggestion) => (
                 <div
                   key={suggestion.name}
                   className="field-item__suggestion"
