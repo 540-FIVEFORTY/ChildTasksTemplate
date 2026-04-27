@@ -20,6 +20,10 @@ export function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [initialData, setInitialData] = useState<TemplateSetup | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [saveStatus, setSaveStatus] = useState<{
+    severity: MessageBarSeverity;
+    text: string;
+  } | null>(null);
   const [jsonMode, setJsonMode] = useState(false);
   const [jsonText, setJsonText] = useState('');
   const [jsonError, setJsonError] = useState<string | null>(null);
@@ -53,12 +57,19 @@ export function SettingsPage() {
   const handleSaveVisual = async (data: TemplateSetup) => {
     try {
       setIsSaving(true);
+      setSaveStatus(null);
       await templateService.saveTemplateSetup(data);
       setInitialData(data);
-      alert('Template saved successfully!');
+      setSaveStatus({
+        severity: MessageBarSeverity.Success,
+        text: 'Template saved successfully.',
+      });
     } catch (error) {
       console.error('Failed to save:', error);
-      alert('Failed to save template: ' + (error as Error).message);
+      setSaveStatus({
+        severity: MessageBarSeverity.Error,
+        text: 'Failed to save template: ' + (error as Error).message,
+      });
     } finally {
       setIsSaving(false);
     }
@@ -78,15 +89,24 @@ export function SettingsPage() {
       }
 
       setIsSaving(true);
+      setSaveStatus(null);
       await templateService.saveTemplateSetup(parsed);
       setInitialData(parsed);
-      alert('Template saved successfully!');
+      setSaveStatus({
+        severity: MessageBarSeverity.Success,
+        text: 'Template saved successfully.',
+      });
     } catch (error) {
       console.error('Failed to save:', error);
       if (error instanceof SyntaxError) {
         setJsonError('Invalid JSON syntax: ' + error.message);
       } else {
-        setJsonError('Failed to save: ' + (error as Error).message);
+        const message = 'Failed to save: ' + (error as Error).message;
+        setJsonError(message);
+        setSaveStatus({
+          severity: MessageBarSeverity.Error,
+          text: message,
+        });
       }
     } finally {
       setIsSaving(false);
@@ -167,6 +187,16 @@ export function SettingsPage() {
           <span className={jsonMode ? 'active' : ''}>JSON</span>
         </div>
       </div>
+
+      {saveStatus && (
+        <MessageBar
+          severity={saveStatus.severity}
+          className="settings-page__status"
+          onDismiss={() => setSaveStatus(null)}
+        >
+          {saveStatus.text}
+        </MessageBar>
+      )}
 
       {jsonMode ? (
         <div className="settings-page__json-editor">

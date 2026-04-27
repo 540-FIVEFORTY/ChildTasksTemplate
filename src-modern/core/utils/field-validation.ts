@@ -36,6 +36,22 @@ function isValidDate(value: string): boolean {
   return trimmed.length > 0 && !Number.isNaN(Date.parse(trimmed));
 }
 
+const DECIMAL_FIELD_REFERENCE_NAMES = new Set([
+  'microsoft.vsts.scheduling.originalestimate',
+  'microsoft.vsts.scheduling.remainingwork',
+  'microsoft.vsts.scheduling.completedwork',
+  'microsoft.vsts.scheduling.effort',
+  'microsoft.vsts.scheduling.storypoints',
+]);
+
+function normalizedType(field: WorkItemFieldInfo): string {
+  return (field.type ?? '').toLowerCase();
+}
+
+function isDecimalLikeField(field: WorkItemFieldInfo): boolean {
+  return DECIMAL_FIELD_REFERENCE_NAMES.has(field.referenceName.toLowerCase());
+}
+
 function isDateLikeField(field: WorkItemFieldInfo): boolean {
   const candidates = [field.referenceName, field.name].filter(Boolean);
 
@@ -55,20 +71,23 @@ function formatAllowedValues(values: string[]): string {
 
 export function describeExpectedFieldFormat(field: WorkItemFieldInfo): string {
   const allowedValues = normalizeAllowedValues(field.allowedValues);
+  const type = normalizedType(field);
 
   if (allowedValues.length > 0) {
     return `Dropdown: ${formatAllowedValues(allowedValues)}`;
   }
 
-  if (field.type === 'dateTime' || isDateLikeField(field)) {
+  if (type === 'datetime' || isDateLikeField(field)) {
     return 'Date';
   }
 
-  switch (field.type) {
+  if (type === 'double' || isDecimalLikeField(field)) {
+    return 'Decimal number';
+  }
+
+  switch (type) {
     case 'integer':
       return 'Integer';
-    case 'double':
-      return 'Decimal number';
     case 'boolean':
       return 'Boolean';
     default:
@@ -92,20 +111,22 @@ function validateFieldValue(
     return `Value "${trimmed}" is not valid for "${fieldName}". Expected one of: ${formatAllowedValues(allowedValues)}.`;
   }
 
-  if (metadata.type === 'integer' && !isValidInteger(trimmed)) {
+  const type = normalizedType(metadata);
+
+  if (type === 'integer' && !isValidInteger(trimmed)) {
     return `Value "${trimmed}" is not valid for "${fieldName}". Expected an integer.`;
   }
 
-  if (metadata.type === 'double' && !isValidDecimal(trimmed)) {
+  if ((type === 'double' || isDecimalLikeField(metadata)) && !isValidDecimal(trimmed)) {
     return `Value "${trimmed}" is not valid for "${fieldName}". Expected a decimal number.`;
   }
 
-  if ((metadata.type === 'dateTime' || isDateLikeField(metadata)) && !isValidDate(trimmed)) {
+  if ((type === 'datetime' || isDateLikeField(metadata)) && !isValidDate(trimmed)) {
     return `Value "${trimmed}" is not valid for "${fieldName}". Expected a date.`;
   }
 
   if (
-    metadata.type === 'boolean' &&
+    type === 'boolean' &&
     !['true', 'false'].includes(trimmed.toLowerCase())
   ) {
     return `Value "${trimmed}" is not valid for "${fieldName}". Expected true or false.`;

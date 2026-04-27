@@ -94,7 +94,7 @@ describe('FieldItem', () => {
             {
               name: 'Original Estimate',
               referenceName: 'Microsoft.VSTS.Scheduling.OriginalEstimate',
-              type: 'double',
+              type: 'string',
             },
           ]}
           existingFieldNames={[]}

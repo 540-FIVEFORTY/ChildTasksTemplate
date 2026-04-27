@@ -26,6 +26,11 @@ const taskFields: WorkItemFieldInfo[] = [
     type: 'double',
   },
   {
+    name: 'Original Estimate',
+    referenceName: 'Microsoft.VSTS.Scheduling.OriginalEstimate',
+    type: 'string',
+  },
+  {
     name: 'Count',
     referenceName: 'Custom.Count',
     type: 'integer',
@@ -99,6 +104,7 @@ describe('validateTemplateFieldsAgainstMetadata', () => {
         { name: 'Microsoft.VSTS.Common.Priority', value: '1.5' },
         { name: 'Custom.Count', value: '1.5' },
         { name: 'Microsoft.VSTS.Scheduling.RemainingWork', value: '2,5' },
+        { name: 'Microsoft.VSTS.Scheduling.OriginalEstimate', value: 'not-a-number' },
         { name: 'Custom.DueDate', value: 'not-a-date' },
         { name: 'Custom.ActivateDate', value: 'tomorrow-ish' },
       ]),
@@ -108,6 +114,7 @@ describe('validateTemplateFieldsAgainstMetadata', () => {
     expect(errors.map((error) => error.message)).toEqual([
       'Value "1.5" is not valid for "Microsoft.VSTS.Common.Priority". Expected one of: 1, 2, 3, 4.',
       'Value "1.5" is not valid for "Custom.Count". Expected an integer.',
+      'Value "not-a-number" is not valid for "Microsoft.VSTS.Scheduling.OriginalEstimate". Expected a decimal number.',
       'Value "not-a-date" is not valid for "Custom.DueDate". Expected a date.',
       'Value "tomorrow-ish" is not valid for "Custom.ActivateDate". Expected a date.',
     ]);
@@ -130,8 +137,9 @@ describe('describeExpectedFieldFormat', () => {
   it('describes dropdown, integer, decimal, and date fields', () => {
     expect(describeExpectedFieldFormat(taskFields[0])).toBe('Dropdown: 1, 2, 3, 4');
     expect(describeExpectedFieldFormat(taskFields[2])).toBe('Decimal number');
-    expect(describeExpectedFieldFormat(taskFields[4])).toBe('Date');
+    expect(describeExpectedFieldFormat(taskFields[3])).toBe('Decimal number');
     expect(describeExpectedFieldFormat(taskFields[5])).toBe('Date');
+    expect(describeExpectedFieldFormat(taskFields[6])).toBe('Date');
     expect(describeExpectedFieldFormat({ name: 'Title', referenceName: 'System.Title', type: 'string' })).toBe('Text');
   });
 

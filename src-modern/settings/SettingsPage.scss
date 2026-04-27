@@ -91,6 +91,10 @@
     border-top: 1px solid var(--palette-neutral-20, #eee);
   }
 
+  &__status {
+    margin-bottom: 16px;
+  }
+
   &__error {
     margin-bottom: 8px;
   }
