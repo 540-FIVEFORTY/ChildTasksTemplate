@@ -36,6 +36,19 @@ function isValidDate(value: string): boolean {
   return trimmed.length > 0 && !Number.isNaN(Date.parse(trimmed));
 }
 
+function isDateLikeField(field: WorkItemFieldInfo): boolean {
+  const candidates = [field.referenceName, field.name].filter(Boolean);
+
+  return candidates.some((candidate) => {
+    const normalized = candidate.toLowerCase();
+
+    return (
+      normalized.endsWith('date') ||
+      /(^|[.\s_-])date($|[.\s_-])/.test(normalized)
+    );
+  });
+}
+
 function formatAllowedValues(values: string[]): string {
   return values.join(', ');
 }
@@ -47,13 +60,15 @@ export function describeExpectedFieldFormat(field: WorkItemFieldInfo): string {
     return `Dropdown: ${formatAllowedValues(allowedValues)}`;
   }
 
+  if (field.type === 'dateTime' || isDateLikeField(field)) {
+    return 'Date';
+  }
+
   switch (field.type) {
     case 'integer':
       return 'Integer';
     case 'double':
       return 'Decimal number';
-    case 'dateTime':
-      return 'Date';
     case 'boolean':
       return 'Boolean';
     default:
@@ -85,7 +100,7 @@ function validateFieldValue(
     return `Value "${trimmed}" is not valid for "${fieldName}". Expected a decimal number.`;
   }
 
-  if (metadata.type === 'dateTime' && !isValidDate(trimmed)) {
+  if ((metadata.type === 'dateTime' || isDateLikeField(metadata)) && !isValidDate(trimmed)) {
     return `Value "${trimmed}" is not valid for "${fieldName}". Expected a date.`;
   }
 

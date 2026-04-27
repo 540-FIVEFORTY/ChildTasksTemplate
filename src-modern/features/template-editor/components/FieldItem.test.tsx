@@ -111,7 +111,7 @@ describe('FieldItem', () => {
     );
   });
 
-  it('shows a date value example when the selected field expects a date', () => {
+  it('shows a date value example when the selected field is date-like', () => {
     container = document.createElement('div');
     document.body.appendChild(container);
     const root = createRoot(container);
@@ -119,12 +119,12 @@ describe('FieldItem', () => {
     act(() => {
       root.render(
         <FieldItem
-          field={{ name: 'Custom.TargetDate', value: '' }}
+          field={{ name: 'Custom.ActivateDate', value: '' }}
           availableFields={[
             {
-              name: 'Target Date',
-              referenceName: 'Custom.TargetDate',
-              type: 'dateTime',
+              name: 'ActivateDate',
+              referenceName: 'Custom.ActivateDate',
+              type: 'string',
             },
           ]}
           existingFieldNames={[]}

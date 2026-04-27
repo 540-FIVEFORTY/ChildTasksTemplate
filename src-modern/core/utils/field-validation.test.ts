@@ -35,6 +35,11 @@ const taskFields: WorkItemFieldInfo[] = [
     referenceName: 'Custom.DueDate',
     type: 'dateTime',
   },
+  {
+    name: 'ActivateDate',
+    referenceName: 'Custom.ActivateDate',
+    type: 'string',
+  },
 ];
 
 function setupWithFields(fields: TemplateSetup['templates'][number]['tasks'][number]['fields']): TemplateSetup {
@@ -95,6 +100,7 @@ describe('validateTemplateFieldsAgainstMetadata', () => {
         { name: 'Custom.Count', value: '1.5' },
         { name: 'Microsoft.VSTS.Scheduling.RemainingWork', value: '2,5' },
         { name: 'Custom.DueDate', value: 'not-a-date' },
+        { name: 'Custom.ActivateDate', value: 'tomorrow-ish' },
       ]),
       { Task: taskFields }
     );
@@ -103,6 +109,7 @@ describe('validateTemplateFieldsAgainstMetadata', () => {
       'Value "1.5" is not valid for "Microsoft.VSTS.Common.Priority". Expected one of: 1, 2, 3, 4.',
       'Value "1.5" is not valid for "Custom.Count". Expected an integer.',
       'Value "not-a-date" is not valid for "Custom.DueDate". Expected a date.',
+      'Value "tomorrow-ish" is not valid for "Custom.ActivateDate". Expected a date.',
     ]);
   });
 
@@ -124,6 +131,7 @@ describe('describeExpectedFieldFormat', () => {
     expect(describeExpectedFieldFormat(taskFields[0])).toBe('Dropdown: 1, 2, 3, 4');
     expect(describeExpectedFieldFormat(taskFields[2])).toBe('Decimal number');
     expect(describeExpectedFieldFormat(taskFields[4])).toBe('Date');
+    expect(describeExpectedFieldFormat(taskFields[5])).toBe('Date');
     expect(describeExpectedFieldFormat({ name: 'Title', referenceName: 'System.Title', type: 'string' })).toBe('Text');
   });
 
