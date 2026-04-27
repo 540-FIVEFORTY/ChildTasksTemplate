@@ -4,10 +4,9 @@
 import { useMemo, useState, useRef, useCallback } from 'react';
 import { TextField } from 'azure-devops-ui/TextField';
 import { Button } from 'azure-devops-ui/Button';
-import { Dropdown } from 'azure-devops-ui/Dropdown';
-import { DropdownSelection } from 'azure-devops-ui/Utilities/DropdownSelection';
 import type { Field, FieldType } from '@core/models';
 import type { WorkItemFieldInfo } from '@core/services';
+import { describeExpectedFieldFormat } from '@core/utils';
 
 interface FieldSuggestion {
   name: string;
@@ -15,6 +14,7 @@ interface FieldSuggestion {
   type: FieldType;
   helpText?: string;
   allowedValues?: string[];
+  metadata?: WorkItemFieldInfo;
 }
 
 interface FieldItemProps {
@@ -152,12 +152,6 @@ function normalizeNumericValue(value: string): string {
   return value;
 }
 
-// Type selector options
-const TYPE_OPTIONS = [
-  { id: 'text', text: 'Text' },
-  { id: 'number', text: 'Number' },
-];
-
 function metadataTypeToFieldType(type?: string): FieldType {
   return type === 'integer' || type === 'double' ? 'number' : 'text';
 }
@@ -245,6 +239,7 @@ export function FieldItem({
       type: metadataTypeToFieldType(availableField.type),
       helpText: availableField.helpText,
       allowedValues: normalizeAllowedValues(availableField.allowedValues),
+      metadata: availableField,
     }));
   }, [availableFields]);
 
@@ -337,28 +332,27 @@ export function FieldItem({
     [isKnownNumeric, field.type]
   );
 
-  // Show type selector only for unknown fields
-  const showTypeSelector = useMemo(
-    () => field.name.trim() !== '' && !selectedFieldOption && !isKnownNumeric,
-    [field.name, isKnownNumeric, selectedFieldOption]
-  );
-
-  const hasInvalidValue = useMemo(
+  const hasInvalidNumericValue = useMemo(
     () => isNumeric && !isValidNumericValue(field.value || ''),
     [isNumeric, field.value]
   );
 
-  // Create selection for dropdown
-  const typeSelection = useMemo(() => {
-    const selection = new DropdownSelection();
-    const selectedIndex = field.type === 'number' ? 1 : 0;
-    selection.select(selectedIndex);
-    return selection;
-  }, [field.type]);
+  const hasInvalidAllowedValue = useMemo(() => {
+    const value = field.value?.trim() ?? '';
+    const allowedValues = selectedFieldOption?.allowedValues;
 
-  const handleTypeChange = (_event: React.SyntheticEvent<HTMLElement>, item: { id: string }) => {
-    onUpdateType(item.id as FieldType);
-  };
+    if (!value || !allowedValues || allowedValues.length === 0) {
+      return false;
+    }
+
+    if (value.includes('{') && value.includes('}')) {
+      return false;
+    }
+
+    return !allowedValues.includes(value);
+  }, [field.value, selectedFieldOption?.allowedValues]);
+
+  const hasInvalidValue = hasInvalidNumericValue || hasInvalidAllowedValue;
 
   const valueErrorStyle: React.CSSProperties = hasInvalidValue
     ? {
@@ -378,7 +372,7 @@ export function FieldItem({
 
   return (
     <div className="field-item">
-      <div className={`field-item__row ${showTypeSelector ? 'field-item__row--with-type' : ''}`}>
+      <div className="field-item__row">
         <div className="field-item__name-container" ref={nameInputRef} style={nameErrorStyle}>
           <TextField
             value={searchText}
@@ -418,7 +412,7 @@ export function FieldItem({
               onFocus={() => setShowValueSuggestions(true)}
               placeholder={
                 selectedFieldOption?.allowedValues?.length
-                  ? 'Select a value or type one manually'
+                  ? 'Select a valid value or use {Parent.Field}'
                   : 'Value (e.g. 8 or {System.IterationPath})'
               }
               className="field-item__value"
@@ -438,14 +432,6 @@ export function FieldItem({
             )}
           </div>
         </div>
-        {showTypeSelector && (
-          <Dropdown
-            items={TYPE_OPTIONS}
-            selection={typeSelection}
-            onSelect={handleTypeChange}
-            className="field-item__type"
-          />
-        )}
         <Button
           iconProps={{ iconName: 'Delete' }}
           subtle
@@ -460,17 +446,16 @@ export function FieldItem({
       )}
       {hasInvalidValue && (
         <div className="field-item__error">
-          This field requires a numeric value
+          {hasInvalidAllowedValue
+            ? 'This field value is not in the allowed values list'
+            : 'This field requires a numeric value'}
         </div>
       )}
-      {selectedFieldOption?.allowedValues &&
-        selectedFieldOption.allowedValues.length > 0 && (
-          <div className="field-item__hint">
-            {selectedFieldOption.allowedValues.length} allowed value
-            {selectedFieldOption.allowedValues.length === 1 ? '' : 's'} available
-            for this field.
-          </div>
-        )}
+      {selectedFieldOption?.metadata && (
+        <div className="field-item__hint">
+          Expected format: {describeExpectedFieldFormat(selectedFieldOption.metadata)}
+        </div>
+      )}
     </div>
   );
 }

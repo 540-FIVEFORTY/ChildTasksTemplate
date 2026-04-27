@@ -72,6 +72,7 @@ interface TemplateEditorState {
 
   // Actions - Validation
   validate: () => Promise<boolean>;
+  setValidationErrors: (errors: ValidationError[]) => void;
   clearValidationErrors: () => void;
 }
 
@@ -393,7 +394,7 @@ export const useTemplateEditorStore = create<TemplateEditorState>()(
           state.hasWarnings = errors.some((e) => e.severity === 'warning');
         });
 
-        return errors.length === 0;
+        return !errors.some((e) => e.severity === 'error');
       },
 
       clearValidationErrors: () =>
@@ -401,6 +402,13 @@ export const useTemplateEditorStore = create<TemplateEditorState>()(
           state.validationErrors = [];
           state.hasErrors = false;
           state.hasWarnings = false;
+        }),
+
+      setValidationErrors: (errors) =>
+        set((state) => {
+          state.validationErrors = errors;
+          state.hasErrors = errors.some((e) => e.severity === 'error');
+          state.hasWarnings = errors.some((e) => e.severity === 'warning');
         }),
     })),
     { name: 'TemplateEditor' }

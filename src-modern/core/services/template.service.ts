@@ -44,31 +44,41 @@ export class TemplateService {
   /**
    * Initialisation du service (lazy)
    */
-  private async ensureInitialized(): Promise<void> {
-    if (this.dataManager && this.projectId) {
+  private async ensureInitialized(options: { refreshDataManager?: boolean } = {}): Promise<void> {
+    if (this.dataManager && this.projectId && !options.refreshDataManager) {
       return;
     }
 
-    // Récupérer le projet courant
-    const projectService = await SDK.getService<IProjectPageService>(
-      ServiceIds.ProjectPageService
-    );
-    const project = await projectService.getProject();
+    if (!this.projectId) {
+      // Récupérer le projet courant
+      const projectService = await SDK.getService<IProjectPageService>(
+        ServiceIds.ProjectPageService
+      );
+      const project = await projectService.getProject();
 
-    if (!project) {
-      throw new Error('No project defined');
+      if (!project) {
+        throw new Error('No project defined');
+      }
+
+      this.projectId = project.id;
     }
-
-    this.projectId = project.id;
 
     // Récupérer le data manager
     const extensionContext = SDK.getExtensionContext();
+    const extensionId =
+      (extensionContext as { id?: string; extensionId?: string }).id ??
+      (extensionContext as { id?: string; extensionId?: string }).extensionId;
+
+    if (!extensionId) {
+      throw new Error('No extension ID defined');
+    }
+
     const dataService = await SDK.getService<IExtensionDataService>(
       ServiceIds.ExtensionDataService
     );
 
     this.dataManager = await dataService.getExtensionDataManager(
-      extensionContext.id,
+      extensionId,
       await SDK.getAccessToken()
     );
   }
@@ -122,7 +132,7 @@ export class TemplateService {
    * Sauvegarder la configuration des templates
    */
   async saveTemplateSetup(setup: TemplateSetup): Promise<void> {
-    await this.ensureInitialized();
+    await this.ensureInitialized({ refreshDataManager: true });
 
     // Validation avant sauvegarde
     this.validateTemplateSetup(setup);

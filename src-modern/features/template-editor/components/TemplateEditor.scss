@@ -159,11 +159,16 @@
   }
 
   &__count {
+    flex: 0 0 auto;
     font-size: 12px;
     color: var(--text-secondary-color, #666);
     padding: 2px 8px;
     background: var(--palette-neutral-10, #e0e0e0);
     border-radius: 10px;
+  }
+
+  &__remove {
+    flex: 0 0 auto;
   }
 
   &__content {
@@ -312,6 +317,8 @@
     font-family: 'Consolas', 'Monaco', monospace;
     font-size: 12px;
     color: var(--text-primary-color, #333);
+    overflow-wrap: anywhere;
+    white-space: normal;
   }
 
   &__suggestion-desc {

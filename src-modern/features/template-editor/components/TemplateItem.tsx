@@ -64,6 +64,7 @@ export function TemplateItem({
           danger
           onClick={onRemove}
           tooltipProps={{ text: 'Remove template' }}
+          className="template-item__remove"
         />
       </div>
 

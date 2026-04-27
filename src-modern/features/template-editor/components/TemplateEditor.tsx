@@ -11,7 +11,11 @@ import { Spinner, SpinnerSize } from 'azure-devops-ui/Spinner';
 import { useTemplateEditorStore } from '../store/templateEditorStore';
 import { TemplateItem } from './TemplateItem';
 import type { TemplateSetup } from '@core/models';
-import { parseTemplateImport } from '@core/utils';
+import {
+  parseTemplateImport,
+  validateTemplateFieldsAgainstMetadata,
+  type WorkItemFieldsByType,
+} from '@core/utils';
 import { workItemMetadataService } from '@core/services';
 
 import './TemplateEditor.scss';
@@ -25,6 +29,25 @@ const FALLBACK_WORK_ITEM_TYPES = [
   'Feature',
   'Issue',
 ];
+
+async function loadFieldsByType(setup: TemplateSetup): Promise<WorkItemFieldsByType> {
+  const workItemTypes = Array.from(
+    new Set(
+      setup.templates.flatMap((template) =>
+        template.tasks.map((task) => task.workItemType || 'Task')
+      )
+    )
+  );
+
+  const entries = await Promise.all(
+    workItemTypes.map(async (workItemType) => [
+      workItemType,
+      await workItemMetadataService.getFieldsForWorkItemType(workItemType),
+    ] as const)
+  );
+
+  return Object.fromEntries(entries);
+}
 
 interface TemplateEditorProps {
   initialData: TemplateSetup | null;
@@ -59,6 +82,7 @@ export function TemplateEditor({
     updateFieldValue,
     updateFieldType,
     validate,
+    setValidationErrors,
   } = useTemplateEditorStore();
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [importText, setImportText] = useState('');
@@ -85,8 +109,40 @@ export function TemplateEditor({
 
   const handleSave = async () => {
     const isValid = await validate();
-    if (isValid && templateSetup) {
+    if (!isValid || !templateSetup) {
+      return;
+    }
+
+    try {
+      const fieldsByType = await loadFieldsByType(templateSetup);
+      const metadataErrors = validateTemplateFieldsAgainstMetadata(
+        templateSetup,
+        fieldsByType
+      );
+      const currentWarnings = useTemplateEditorStore
+        .getState()
+        .validationErrors.filter((error) => error.severity === 'warning');
+      const combinedErrors = [...currentWarnings, ...metadataErrors];
+
+      if (combinedErrors.length > 0) {
+        setValidationErrors(combinedErrors);
+      }
+
+      if (metadataErrors.some((error) => error.severity === 'error')) {
+        return;
+      }
+
       onSave(templateSetup);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown metadata error';
+      setValidationErrors([
+        {
+          path: ['metadata'],
+          severity: 'error',
+          message: `Project work item metadata could not be validated: ${errorMessage}`,
+        },
+      ]);
     }
   };
 

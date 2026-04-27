@@ -119,4 +119,41 @@ describe('TemplateService', () => {
       })
     ).rejects.toThrow('Template names must be unique');
   });
+
+  it('refreshes the extension data manager before saving after an earlier load', async () => {
+    vi.mocked(SDK.getAccessToken)
+      .mockResolvedValueOnce('initial-token')
+      .mockResolvedValueOnce('fresh-save-token');
+
+    getValue.mockImplementation(async (key: string) => {
+      if (key === CURRENT_KEY) {
+        return {
+          version: 3,
+          templates: [{ name: 'Current', tasks: [] }],
+        };
+      }
+
+      return undefined;
+    });
+    setValue.mockResolvedValue(undefined);
+
+    const service = new TemplateService();
+    await service.getTemplateSetup();
+    await service.saveTemplateSetup({
+      version: 3,
+      templates: [{ name: 'Current', tasks: [] }],
+    });
+
+    expect(getExtensionDataManager).toHaveBeenCalledTimes(2);
+    expect(getExtensionDataManager).toHaveBeenNthCalledWith(
+      1,
+      'test-extension',
+      'initial-token'
+    );
+    expect(getExtensionDataManager).toHaveBeenNthCalledWith(
+      2,
+      'test-extension',
+      'fresh-save-token'
+    );
+  });
 });
