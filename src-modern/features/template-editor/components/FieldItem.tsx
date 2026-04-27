@@ -397,11 +397,15 @@ export function FieldItem({
   }, [isNumeric, selectedFieldOption?.metadata]);
 
   const formatExample = useMemo(() => {
-    if (expectedFormat !== 'Decimal number') {
-      return null;
+    if (expectedFormat === 'Decimal number') {
+      return 'Example: 2.5 or 2,5';
     }
 
-    return 'Example: 2.5 or 2,5';
+    if (expectedFormat === 'Date') {
+      return 'Example: 2026-04-27';
+    }
+
+    return null;
   }, [expectedFormat]);
 
   const valueErrorStyle: React.CSSProperties = hasInvalidValue

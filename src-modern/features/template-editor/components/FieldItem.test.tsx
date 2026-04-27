@@ -110,4 +110,34 @@ describe('FieldItem', () => {
       'Expected format: Decimal number - Example: 2.5 or 2,5'
     );
   });
+
+  it('shows a date value example when the selected field expects a date', () => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = createRoot(container);
+
+    act(() => {
+      root.render(
+        <FieldItem
+          field={{ name: 'Custom.TargetDate', value: '' }}
+          availableFields={[
+            {
+              name: 'Target Date',
+              referenceName: 'Custom.TargetDate',
+              type: 'dateTime',
+            },
+          ]}
+          existingFieldNames={[]}
+          onUpdateName={vi.fn()}
+          onUpdateValue={vi.fn()}
+          onUpdateType={vi.fn()}
+          onRemove={vi.fn()}
+        />
+      );
+    });
+
+    expect(container.querySelector('.field-item__hint')?.textContent).toContain(
+      'Expected format: Date - Example: 2026-04-27'
+    );
+  });
 });
