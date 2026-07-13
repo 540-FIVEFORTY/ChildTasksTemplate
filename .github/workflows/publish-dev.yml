@@ -1,0 +1,75 @@
+# Publishes the extension to the Visual Studio Marketplace as a PRIVATE
+# preview (Fiveforty.ChildTasksTemplate-dev), shared only with the
+# `fiveforty` Azure DevOps organization. Runs on every push to `dev`.
+#
+# Required repository secret:
+#   TFX_PAT  — Azure DevOps Personal Access Token, scope "Marketplace > Publish".
+#              Create at https://dev.azure.com/fiveforty/_usersSettings/tokens
+#              Add via GitHub > Settings > Secrets and variables > Actions.
+#
+# The PUBLIC production channel (Fiveforty.ChildTasksTemplate) will be a
+# separate workflow (publish-prod.yml) triggered by a `v*.*.*` tag and gated
+# by a GitHub Environment "production" with a required reviewer. This dev
+# workflow is structured so prod only needs its own overrides.prod.json
+# ({"public": true}) and the tag/approval trigger.
+
+name: Publish Dev (private preview)
+
+on:
+  push:
+    branches: [dev]
+    paths-ignore:
+      - '**/*.md'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-dev
+  cancel-in-progress: true
+
+jobs:
+  publish-dev:
+    name: Build & publish private preview
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Verify Marketplace token is configured
+        env:
+          TFX_PAT: ${{ secrets.TFX_PAT }}
+        run: |
+          if [ -z "$TFX_PAT" ]; then
+            echo "::error::Missing repository secret TFX_PAT (Azure DevOps PAT, scope 'Marketplace > Publish')."
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Copy documentation assets
+        run: node scripts/copy-docs.js
+
+      - name: Publish private preview to Marketplace
+        env:
+          TFX_PAT: ${{ secrets.TFX_PAT }}
+        run: |
+          npx tfx extension publish \
+            --manifest-globs vss-extension.json \
+            --overrides-file overrides.dev.json \
+            --override "{\"version\":\"3.0.${GITHUB_RUN_NUMBER}\"}" \
+            --share-with fiveforty \
+            --auth-type pat \
+            --token "$TFX_PAT" \
+            --no-wait-validation
