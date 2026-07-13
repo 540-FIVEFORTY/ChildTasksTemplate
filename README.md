@@ -4,9 +4,28 @@
 
 This Azure DevOps extension enables creating child tasks from predefined templates directly from work items (User Stories, Bugs, etc.).
 
-## 🚀 Version 3.0.24 - Modern Architecture
+## 🔔 What's New in 3.0.34
 
-Version 3.0.24 ships the modern Azure DevOps extension built from `src-modern/`:
+Incremental improvements to the template editor and field configuration since the 3.0.24 modern-architecture release:
+
+### Template Editor UX
+- 🖥️ Wider, full-width template configuration that stays visible while editing
+- 🎛️ Explicit, clearer template editor controls
+- 🔽 Field dropdowns remain usable inside the editor
+
+### Field Configuration & Hints
+- 🔢 Inline decimal examples in field hints
+- 📅 Inline date examples in field hints
+- 🗓️ Date-like fields are detected and treated as dates
+- 💾 Hardened field hints and clearer save feedback
+
+### Validation & Reliability
+- 🛡️ Invalid template fields are blocked before saving
+- 🧪 Hardened ChildTasks private testing workflow
+
+## 🏗️ Modern Architecture (since 3.0.0)
+
+The extension ships the modern Azure DevOps build from `src-modern/`:
 
 ### Major Changes
 
@@ -188,7 +207,7 @@ This will:
 1. Compile TypeScript
 2. Bundle with Vite (production mode)
 3. Copy documentation assets
-4. Create `bin/Fiveforty.ChildTasksTemplate-3.0.24.vsix`
+4. Create `bin/Fiveforty.ChildTasksTemplate-3.0.34.vsix`
 
 ### Upload to Marketplace
 
@@ -383,4 +402,4 @@ Built with:
 
 ---
 
-**Version 3.0.0** - Modern Architecture with Vite + React 18 - © 2024 Fiveforty
+**Version 3.0.34** - Modern Architecture with Vite + React 18 - © 2026 Fiveforty
