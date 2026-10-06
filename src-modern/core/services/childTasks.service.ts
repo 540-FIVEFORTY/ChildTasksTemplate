@@ -5,7 +5,6 @@
 import pupa from "pupa"
 import * as SDK from "azure-devops-extension-sdk"
 import type { Task } from "@core/models/Task"
-import type { Field } from "@core/models/Field"
 import type { Template } from "@core/models/Template"
 
 interface WorkItem {
@@ -170,6 +169,51 @@ export class ChildTasksService {
         }
     }
 
+    /**
+     * Azure DevOps rejects a patch that sets the same field twice (VS403691).
+     * Default title comes from the interpolated task name; an explicit
+     * System.Title field overrides it. Later fields win for duplicate names.
+     */
+    private buildPatchDocument(parent: WorkItem, task: Task): JsonPatchOperation[] {
+        const patch: JsonPatchOperation[] = [this.newParentRelation(parent)]
+        const fields = new Map<string, { name: string; value: unknown }>()
+
+        const setField = (name: string, value: unknown) => {
+            const trimmed = name.trim()
+            if (!trimmed) {
+                return
+            }
+            const key = trimmed.toLowerCase()
+            const existing = fields.get(key)
+            if (existing) {
+                existing.value = value
+                return
+            }
+            fields.set(key, { name: trimmed, value })
+        }
+
+        const titleFromName = ChildTasksService.interpolate(task.name, parent)
+        if (titleFromName !== null) {
+            setField("System.Title", titleFromName)
+        }
+
+        for (const field of task.fields ?? []) {
+            if (!field?.name) {
+                continue
+            }
+            const interpolatedValue = ChildTasksService.interpolate(field.value, parent)
+            if (interpolatedValue !== null) {
+                setField(field.name, interpolatedValue)
+            }
+        }
+
+        for (const field of fields.values()) {
+            patch.push(this.newFieldOperation(field.name, field.value))
+        }
+
+        return patch
+    }
+
     public async execute(context: any): Promise<ChildTaskExecutionResult> {
         console.log("[ChildTasksService] execute called with context:", context)
 
@@ -210,33 +254,12 @@ export class ChildTasksService {
             console.info("[ChildTasksService] Creating tasks from template:", template.name)
 
             for (let i = 0; i < template.tasks.length; i++) {
-                const patch: JsonPatchOperation[] = []
-
-                // Add parent relation
-                patch.push(this.newParentRelation(parent))
-
-                // Add title field (required)
                 const task = template.tasks[i] as Task
                 if (!task) {
                     continue
                 }
 
-                // Add System.Title from task name
-                patch.push(this.newFieldOperation("System.Title", task.name))
-
-                // Add other fields
-                for (let j = 0; j < task.fields.length; j++) {
-                    const field = task.fields[j] as Field
-                    if (!field) {
-                        continue
-                    }
-                    const interpolatedValue = ChildTasksService.interpolate(field.value, parent)
-                    if (interpolatedValue !== null) {
-                        patch.push(this.newFieldOperation(field.name, interpolatedValue))
-                    }
-                }
-
-                // Use workItemType from task template, default to "Task"
+                const patch = this.buildPatchDocument(parent, task)
                 const workItemType = task.workItemType || "Task"
 
                 console.info("[ChildTasksService] Creating work item:", task.name, "Type:", workItemType)
