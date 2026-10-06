@@ -1,14 +1,14 @@
 {
 	"manifestVersion": 1,
 	"id": "ChildTasksTemplate",
-	"version": "3.0.35",
+	"version": "3.1.0",
 	"name": "Child Tasks Template",
-	"public": false,
+	"public": true,
 	"publisher": "Fiveforty",
-	"description": "This extension enables creating user story or bug child tasks from a template.",
+	"description": "Create linked child tasks, bugs or any work item from reusable per-project templates in one click, with parent field values, a visual editor and validation.",
 	"targets": [
 		{
-			"id": "Microsoft.VisualStudio.Services"
+			"id": "Microsoft.VisualStudio.Services.Cloud"
 		}
 	],
 	"demands": [
@@ -104,18 +104,19 @@
 		}
 	},
 	"tags": [
-		"Task",
+		"Tasks",
+		"Child tasks",
 		"Template",
-		"Create"
+		"Work items",
+		"Azure Boards",
+		"Productivity",
+		"Automation"
 	],
 	"repository": {
 		"type": "git",
 		"uri": "https://github.com/dbru540/ChildTasksTemplate.git"
 	},
 	"screenshots": [
-		{
-			"path": "dist/doc/setup_screen.png"
-		},
 		{
 			"path": "dist/doc/add_child_tasks_screen.png"
 		}
