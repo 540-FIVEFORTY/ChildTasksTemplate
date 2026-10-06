@@ -322,4 +322,41 @@ describe('ChildTasksService', () => {
     expect(titleOps).toHaveLength(1);
     expect(titleOps[0].value).toBe('Second title - Parent');
   });
+  it('treats placeholders for empty parent fields as empty and skips the field', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(mockParentFetch({ 'System.Title': 'Parent' }))
+      .mockResolvedValueOnce(mockCreateFetch(204));
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    const service = new ChildTasksService([
+      {
+        name: 'Template A',
+        tasks: [
+          {
+            name: 'Review {System.Title}',
+            workItemType: 'Task',
+            fields: [
+              { name: 'System.AssignedTo', value: '{System.AssignedTo.uniqueName}' },
+              { name: 'System.Description', value: 'Owner: {System.AssignedTo.displayName}' },
+            ],
+          },
+        ],
+      },
+    ]);
+
+    const result = await service.execute({
+      workItemAvailable: true,
+      currentProjectGuid: 'project-1',
+      workItemId: 10,
+    });
+
+    expect(result.status).toBe('success');
+
+    const [patch] = getCreatePatches(fetchMock);
+
+    expect(fieldOperations(patch, 'System.AssignedTo')).toHaveLength(0);
+    expect(fieldOperations(patch, 'System.Description')[0].value).toBe('Owner: ');
+  });
 });

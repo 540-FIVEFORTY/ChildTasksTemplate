@@ -202,7 +202,7 @@ export class ChildTasksService {
                 continue
             }
             const interpolatedValue = ChildTasksService.interpolate(field.value, parent)
-            if (interpolatedValue !== null) {
+            if (interpolatedValue !== null && interpolatedValue.trim() !== "") {
                 setField(field.name, interpolatedValue)
             }
         }
@@ -259,13 +259,14 @@ export class ChildTasksService {
                     continue
                 }
 
-                const patch = this.buildPatchDocument(parent, task)
                 const workItemType = task.workItemType || "Task"
 
-                console.info("[ChildTasksService] Creating work item:", task.name, "Type:", workItemType)
-                console.log("[ChildTasksService] Patch document:", JSON.stringify(patch, null, 2))
-
                 try {
+                    const patch = this.buildPatchDocument(parent, task)
+
+                    console.info("[ChildTasksService] Creating work item:", task.name, "Type:", workItemType)
+                    console.log("[ChildTasksService] Patch document:", JSON.stringify(patch, null, 2))
+
                     const workItem = await this.createWorkItem(projectId, workItemType, patch)
                     console.info("[ChildTasksService] Created work item", workItem.id, "Type:", workItemType)
                     results.push({
@@ -319,7 +320,9 @@ export class ChildTasksService {
         obj["id"] = parent.id
         obj["rev"] = parent.rev
         obj["url"] = parent.url
-        return pupa(text, obj)
+        // Azure DevOps omits empty fields from the parent, so a placeholder such as
+        // {System.AssignedTo.uniqueName} on an unassigned item resolves to "".
+        return pupa(text, obj, { transform: ({ value }) => value ?? "" })
     }
 
     private static setFieldValue(obj: Record<string, any>, fieldName: string, value: any) {
