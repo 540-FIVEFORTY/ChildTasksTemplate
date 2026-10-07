@@ -31,6 +31,7 @@ Stop re-typing the same tasks on every user story. **Child Tasks Template** lets
 
 - **One-click child creation** — an **Add tasks** action on the work item form, on board and backlog cards, and in query results.
 - **Several templates at once** — tick one or more templates in the picker; every task of every selected template is created.
+- **Template search** — find a template by typing part of its name, with a drop-down list of matches.
 - **Parent values in children** — reuse any parent field in a child's title or fields: `{System.Title}`, `{System.IterationPath}`, `{System.AssignedTo.uniqueName}`, `{id}`…
 - **Any work item type** — each entry in a template can be a Task, a Bug, or any other child type your process allows.
 - **Visual template editor** — build templates with forms instead of hand-written JSON, with a JSON mode for power users.
@@ -73,7 +74,7 @@ In JSON mode, **Copy JSON** puts the whole configuration on your clipboard — h
 
    ![Add tasks menu entry](doc/Add_tasks.png)
 
-3. Select one or more templates and confirm.
+3. Select one or more templates and confirm. With many templates, type in the **Search templates** box: matching names appear in a drop-down list (case and accents are ignored) and the list below is filtered. Press **Enter** or click a name to select it.
 
 The child work items are created with a **Parent** link to the work item you started from. A summary shows the created items and any that failed.
 

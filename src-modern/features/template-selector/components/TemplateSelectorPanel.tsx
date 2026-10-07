@@ -3,7 +3,7 @@
  * Utilise React 18 + Hooks + Azure DevOps UI
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Button } from 'azure-devops-ui/Button';
 import { ButtonGroup } from 'azure-devops-ui/ButtonGroup';
 import { MessageBar, MessageBarSeverity } from 'azure-devops-ui/MessageBar';
@@ -15,6 +15,8 @@ import { useTemplateSelection } from '../hooks/useTemplateSelection';
 import { useAzureDialog } from '@shared/hooks/useAzureDialog';
 import { useTaskCreation } from '@features/task-creation/hooks/useTaskCreation';
 import { TemplateList } from './TemplateList';
+import { TemplateSearch } from './TemplateSearch';
+import { filterTemplates } from '../utils/templateSearch';
 
 import type { IChooseTemplatePanelResult } from '../types';
 import type { ChildTaskExecutionResult } from '@core/services/childTasks.service';
@@ -29,6 +31,7 @@ export function TemplateSelectorPanel() {
   const dialog = useAzureDialog<IChooseTemplatePanelResult>();
   const [submissionResult, setSubmissionResult] =
     useState<ChildTaskExecutionResult | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const {
     templates,
@@ -45,6 +48,11 @@ export function TemplateSelectorPanel() {
   const isLoading = !dialog.isReady || isLoadingTemplates;
 
   const { createTasks, isCreating } = useTaskCreation();
+
+  const visibleTemplates = useMemo(
+    () => filterTemplates(templates, searchQuery),
+    [templates, searchQuery]
+  );
 
   const handleToggleTemplate = useCallback(
     (name: string) => {
@@ -178,7 +186,16 @@ export function TemplateSelectorPanel() {
         </h2>
         <p className="template-selector-panel__subtitle">
           {selectionCount} template{selectionCount !== 1 ? 's' : ''} selected
+          {searchQuery.trim() &&
+            ` · showing ${visibleTemplates.length} of ${templates.length}`}
         </p>
+        <TemplateSearch
+          templates={templates}
+          query={searchQuery}
+          onQueryChange={setSearchQuery}
+          onPick={handleToggleTemplate}
+          isSelected={isSelected}
+        />
       </div>
 
       <div className="template-selector-panel__content">
@@ -206,11 +223,17 @@ export function TemplateSelectorPanel() {
           </MessageBar>
         )}
 
-        <TemplateList
-          templates={templates}
-          onToggle={handleToggleTemplate}
-          isSelected={isSelected}
-        />
+        {visibleTemplates.length > 0 ? (
+          <TemplateList
+            templates={visibleTemplates}
+            onToggle={handleToggleTemplate}
+            isSelected={isSelected}
+          />
+        ) : (
+          <p className="template-selector-panel__no-match">
+            No template matches “{searchQuery.trim()}”.
+          </p>
+        )}
       </div>
 
       <ButtonGroup className="template-selector-panel__actions">

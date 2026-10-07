@@ -8,6 +8,7 @@ Stop re-typing the same tasks on every user story. Define reusable templates of 
 
 - **Add tasks** action on the work item form, on board and backlog cards, and in query results.
 - **Several templates at once** — select one or more templates and every task they contain is created.
+- **Template search** — type part of a name to find the right template, even in projects with many.
 - **Parent values in children** — reuse the parent's title, ID, area, iteration, assignee or any other field.
 - **Any child type** — create Tasks, Bugs or any other work item type allowed by your process.
 - **Visual editor** — build templates with forms, or switch to JSON mode.
@@ -44,7 +45,7 @@ Open a parent work item — or right-click it on a board, backlog or query — a
 
 ![Add tasks menu entry](https://raw.githubusercontent.com/dbru540/ChildTasksTemplate/main/doc/Add_tasks.png)
 
-Select one or more templates and confirm. The child work items are created with a **Parent** link to the work item you started from.
+Select one or more templates — or type part of a name in the search box to find it — and confirm. The child work items are created with a **Parent** link to the work item you started from.
 
 ## Reusing parent values
 

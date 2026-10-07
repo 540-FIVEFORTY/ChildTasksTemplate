@@ -33,8 +33,8 @@ export function TemplateList({ templates, onToggle, isSelected }: TemplateListPr
 
   return (
     <div>
-      {templates.map((template, index) => (
-        <div key={index}>{renderRow(template)}</div>
+      {templates.map((template) => (
+        <div key={template}>{renderRow(template)}</div>
       ))}
     </div>
   );
