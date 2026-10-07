@@ -49,8 +49,9 @@ async function init() {
             configuration: context,
             resizable: true,
             modal: true,
-            width: 500,
-            height: 400,
+            // Large enough to list a project's templates without scrolling.
+            width: 720,
+            height: 640,
           });
 
           console.log('[Extension] Dialog opened successfully');
