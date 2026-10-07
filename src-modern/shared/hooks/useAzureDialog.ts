@@ -21,6 +21,8 @@ function fitHeightToScreen(height: number): number {
 export function useAzureDialog<T = any>(size?: DialogSize) {
   const [context, setContext] = useState<any>(null);
   const [isReady, setIsReady] = useState(false);
+  // Panels come with their own title bar, close button and full height.
+  const [isPanel, setIsPanel] = useState(false);
 
   useEffect(() => {
     const initDialog = async () => {
@@ -37,12 +39,13 @@ export function useAzureDialog<T = any>(size?: DialogSize) {
         // from openCustomDialog({ configuration: context })
         if (config) {
           setContext(config);
+          setIsPanel(Boolean(config.panel) && !config.dialog);
         }
 
         setIsReady(true);
         await SDK.notifyLoadSucceeded();
 
-        if (size) {
+        if (size && config?.dialog) {
           // Keep the width the host gave the dialog: it cannot be changed.
           SDK.resize(
             document.documentElement.clientWidth || undefined,
@@ -70,5 +73,6 @@ export function useAzureDialog<T = any>(size?: DialogSize) {
     context,
     close,
     isReady,
+    isPanel,
   };
 }

@@ -7,6 +7,7 @@ import { StrictMode } from 'react';
 console.log('[Settings] React imported');
 
 import { createRoot } from 'react-dom/client';
+import '../styles/theme.scss';
 console.log('[Settings] ReactDOM imported');
 
 import { QueryClientProvider } from '@tanstack/react-query';

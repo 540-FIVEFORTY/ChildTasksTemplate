@@ -1,0 +1,34 @@
+// Base page styles taken from the Azure DevOps theme.
+//
+// SDK.init({ applyTheme: true }) only defines the theme CSS variables: the
+// page itself must use them, otherwise the browser defaults apply (serif
+// font, black text), which is unreadable in the dark theme.
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', '-apple-system', BlinkMacSystemFont, Roboto, 'Helvetica Neue',
+    Helvetica, Ubuntu, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    'Segoe UI Symbol';
+  font-size: 0.875rem;
+  color: var(--text-primary-color, rgba(0, 0, 0, 0.9));
+  background-color: var(--background-color, #fff);
+}
+
+// Form controls do not inherit text styles by default.
+input,
+select,
+textarea,
+button {
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 600;
+}

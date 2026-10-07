@@ -198,15 +198,17 @@ export function TemplateSelectorPanel() {
           <h2 className="template-selector-panel__title">
             Choose templates to apply
           </h2>
-          <Button
-            className="template-selector-panel__close"
-            iconProps={{ iconName: 'Cancel' }}
-            subtle
-            ariaLabel="Close"
-            tooltipProps={{ text: 'Close' }}
-            onClick={handleCancel}
-            disabled={isCreating}
-          />
+          {!dialog.isPanel && (
+            <Button
+              className="template-selector-panel__close"
+              iconProps={{ iconName: 'Cancel' }}
+              subtle
+              ariaLabel="Close"
+              tooltipProps={{ text: 'Close' }}
+              onClick={handleCancel}
+              disabled={isCreating}
+            />
+          )}
         </div>
         <p className="template-selector-panel__subtitle">
           {selectionCount} template{selectionCount !== 1 ? 's' : ''} selected

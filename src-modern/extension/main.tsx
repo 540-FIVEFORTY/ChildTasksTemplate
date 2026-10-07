@@ -6,10 +6,14 @@ console.log('[Extension] Module loading started...');
 import * as SDK from 'azure-devops-extension-sdk';
 import { ServiceIds } from '@core/constants/service-ids';
 
-// Dialog service interface (not exported from azure-devops-extension-api)
-interface IHostDialogService {
-  openCustomDialog(contributionId: string, options?: any): Promise<any>;
+// Host page layout service (not imported from azure-devops-extension-api to
+// avoid its AMD modules).
+interface IHostPageLayoutService {
+  openPanel(contributionId: string, options?: any): void;
 }
+
+// PanelSize.Large from azure-devops-extension-api (a const enum).
+const PANEL_SIZE_LARGE = 2;
 
 console.log('[Extension] SDK imported');
 
@@ -32,26 +36,24 @@ async function init() {
         console.log('[Extension] Execute called with context:', context);
 
         try {
-          // Get the dialog service
-          const dialogService = await SDK.getService<IHostDialogService>(
-            ServiceIds.HostDialogService
+          const layoutService = await SDK.getService<IHostPageLayoutService>(
+            ServiceIds.HostPageLayoutService
           );
-          console.log('[Extension] Dialog service obtained');
 
           // Get extension context to build contribution ID
           const extensionContext = SDK.getExtensionContext();
           const chooseContributionId = `${extensionContext.publisherId}.${extensionContext.extensionId}.child-tasks-template-choose`;
-          console.log('[Extension] Opening dialog with contribution:', chooseContributionId);
+          console.log('[Extension] Opening panel with contribution:', chooseContributionId);
 
-          // Open the choose template dialog
-          await dialogService.openCustomDialog(chooseContributionId, {
-            title: 'Add Child Tasks',
+          // A full-height side panel, as in 2.x: a host dialog keeps a fixed
+          // width and is too small for the template list.
+          layoutService.openPanel(chooseContributionId, {
+            title: 'Add child tasks',
+            size: PANEL_SIZE_LARGE,
             configuration: context,
           });
-
-          console.log('[Extension] Dialog opened successfully');
         } catch (error) {
-          console.error('[Extension] Failed to open dialog:', error);
+          console.error('[Extension] Failed to open panel:', error);
         }
       },
     }));
