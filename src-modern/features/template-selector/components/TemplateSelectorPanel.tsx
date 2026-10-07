@@ -27,7 +27,7 @@ import './TemplateSelectorPanel.scss';
  * Panel de sélection de templates
  * Architecture moderne : Composant fonctionnel avec hooks
  */
-const DIALOG_SIZE = { width: 720, height: 600 };
+const DIALOG_SIZE = { height: 600 };
 
 export function TemplateSelectorPanel() {
   const dialog = useAzureDialog<IChooseTemplatePanelResult>(DIALOG_SIZE);

@@ -5,21 +5,17 @@ import { useState, useEffect } from 'react';
 import * as SDK from 'azure-devops-extension-sdk';
 
 export interface DialogSize {
-  width: number;
   height: number;
 }
 
 /**
  * The host ignores width/height passed to openCustomDialog, so the dialog
- * content asks for its own size. Keep a margin so it fits on small screens.
+ * content asks for its own height. The width is fixed by the host and the
+ * content fits it. Keep a margin so the dialog fits on small screens.
  */
-function fitToScreen({ width, height }: DialogSize): DialogSize {
-  const screenWidth = window.screen?.availWidth || width;
+function fitHeightToScreen(height: number): number {
   const screenHeight = window.screen?.availHeight || height;
-  return {
-    width: Math.max(360, Math.min(width, screenWidth - 120)),
-    height: Math.max(320, Math.min(height, screenHeight - 240)),
-  };
+  return Math.max(320, Math.min(height, screenHeight - 240));
 }
 
 export function useAzureDialog<T = any>(size?: DialogSize) {
@@ -47,8 +43,11 @@ export function useAzureDialog<T = any>(size?: DialogSize) {
         await SDK.notifyLoadSucceeded();
 
         if (size) {
-          const { width, height } = fitToScreen(size);
-          SDK.resize(width, height);
+          // Keep the width the host gave the dialog: it cannot be changed.
+          SDK.resize(
+            document.documentElement.clientWidth || undefined,
+            fitHeightToScreen(size.height)
+          );
         }
       } catch (error) {
         console.error('[useAzureDialog] Failed to initialize:', error);
