@@ -7,7 +7,7 @@ import { Button } from 'azure-devops-ui/Button';
 import { Dropdown } from 'azure-devops-ui/Dropdown';
 import { DropdownSelection } from 'azure-devops-ui/Utilities/DropdownSelection';
 import type { IListBoxItem } from 'azure-devops-ui/ListBox';
-import { useMemo, type CSSProperties } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import type { Task, FieldType } from '@core/models';
 import { FieldItem } from './FieldItem';
 import {
@@ -49,25 +49,38 @@ export function TaskItem({
     staleTime: 5 * 60 * 1000,
   });
 
+  // Keep the saved type selectable even when the project does not list it.
+  const workItemTypes = useMemo(
+    () =>
+      availableWorkItemTypes.includes(currentType)
+        ? availableWorkItemTypes
+        : [currentType, ...availableWorkItemTypes],
+    [availableWorkItemTypes, currentType]
+  );
+
   // Create dropdown items from available work item types
   const workItemTypeItems: IListBoxItem[] = useMemo(
     () =>
-      availableWorkItemTypes.map((type) => ({
+      workItemTypes.map((type) => ({
         id: type,
         text: type,
       })),
-    [availableWorkItemTypes]
+    [workItemTypes]
   );
 
-  // Create selection object for dropdown
-  const workItemTypeSelection = useMemo(() => {
-    const selection = new DropdownSelection();
-    const index = availableWorkItemTypes.indexOf(currentType);
+  // The Dropdown reads its selection object only once, so keep a single
+  // instance and re-select by index whenever the type list or value changes.
+  // Otherwise the index chosen against the fallback list (Task first) ends up
+  // pointing at Bug once the project's alphabetical list has loaded.
+  const [workItemTypeSelection] = useState(() => new DropdownSelection());
+  useEffect(() => {
+    const index = workItemTypes.indexOf(currentType);
     if (index >= 0) {
-      selection.select(index);
+      workItemTypeSelection.select(index);
+    } else {
+      workItemTypeSelection.clear();
     }
-    return selection;
-  }, [currentType, availableWorkItemTypes]);
+  }, [currentType, workItemTypes, workItemTypeSelection]);
 
   const fieldNameColumnWidth = useMemo(() => {
     const longestReferenceName = availableFields.reduce(
