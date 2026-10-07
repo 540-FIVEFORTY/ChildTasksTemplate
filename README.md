@@ -390,7 +390,7 @@ npx tfx extension publish --manifest-globs vss-extension.json \
   --auth-type pat --token <PAT with Marketplace (Publish) scope>
 ```
 
-Bump `version` in both `package.json` and `vss-extension.json` before publishing.
+Public releases reuse the version number of the Dev preview build that was validated: if testers approved Dev `3.1.9`, set `version` to `3.1.9` in both `package.json` and `vss-extension.json`, commit with `[skip ci]` (so no new preview is published), then publish. The public version is then exactly the code that was tested.
 
 ### Contributing
 
