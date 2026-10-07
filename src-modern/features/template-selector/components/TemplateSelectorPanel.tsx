@@ -3,7 +3,7 @@
  * Utilise React 18 + Hooks + Azure DevOps UI
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button } from 'azure-devops-ui/Button';
 import { ButtonGroup } from 'azure-devops-ui/ButtonGroup';
 import { MessageBar, MessageBarSeverity } from 'azure-devops-ui/MessageBar';
@@ -27,8 +27,10 @@ import './TemplateSelectorPanel.scss';
  * Panel de sélection de templates
  * Architecture moderne : Composant fonctionnel avec hooks
  */
+const DIALOG_SIZE = { width: 720, height: 600 };
+
 export function TemplateSelectorPanel() {
-  const dialog = useAzureDialog<IChooseTemplatePanelResult>();
+  const dialog = useAzureDialog<IChooseTemplatePanelResult>(DIALOG_SIZE);
   const [submissionResult, setSubmissionResult] =
     useState<ChildTaskExecutionResult | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -98,6 +100,17 @@ export function TemplateSelectorPanel() {
       result: submissionResult ?? undefined,
     });
   }, [dialog, selectedTemplateNames, submissionResult]);
+
+  // Escape closes the dialog (the search box handles its own Escape first).
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !isCreating) {
+        handleCancel();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [handleCancel, isCreating]);
 
   const resultSeverity = useCallback((result: ChildTaskExecutionResult) => {
     if (result.status === 'success') {
@@ -181,9 +194,20 @@ export function TemplateSelectorPanel() {
   return (
     <div className="template-selector-panel">
       <div className="template-selector-panel__header">
-        <h2 className="template-selector-panel__title">
-          Choose templates to apply
-        </h2>
+        <div className="template-selector-panel__title-row">
+          <h2 className="template-selector-panel__title">
+            Choose templates to apply
+          </h2>
+          <Button
+            className="template-selector-panel__close"
+            iconProps={{ iconName: 'Cancel' }}
+            subtle
+            ariaLabel="Close"
+            tooltipProps={{ text: 'Close' }}
+            onClick={handleCancel}
+            disabled={isCreating}
+          />
+        </div>
         <p className="template-selector-panel__subtitle">
           {selectionCount} template{selectionCount !== 1 ? 's' : ''} selected
           {searchQuery.trim() &&

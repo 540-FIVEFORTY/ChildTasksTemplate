@@ -11,6 +11,7 @@ vi.mock('azure-devops-extension-sdk', () => ({
   register: vi.fn(),
   getAccessToken: vi.fn().mockResolvedValue('test-access-token'),
   getHost: vi.fn().mockReturnValue({ name: 'test-org' }),
+  getWebContext: vi.fn().mockReturnValue({ project: { id: 'web-context-project', name: 'Test' } }),
   getContributionId: vi.fn().mockReturnValue('test-contribution-id'),
   getService: vi.fn(),
   getExtensionContext: vi.fn().mockReturnValue({

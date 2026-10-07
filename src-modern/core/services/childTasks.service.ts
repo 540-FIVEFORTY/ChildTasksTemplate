@@ -6,6 +6,7 @@ import pupa from "pupa"
 import * as SDK from "azure-devops-extension-sdk"
 import type { Task } from "@core/models/Task"
 import type { Template } from "@core/models/Template"
+import { resolveParentWorkItem } from "@core/utils/action-context"
 
 interface WorkItem {
     id: number
@@ -224,15 +225,20 @@ export class ChildTasksService {
             })
         }
 
-        if (!context.workItemAvailable) {
-            console.warn("[ChildTasksService] Work item not available in context")
-            return ChildTasksService.createResult({
-                errorMessage: "The selected work item is not available in the current context.",
-            })
+        const parentRef = resolveParentWorkItem(context)
+        if (!parentRef.ok) {
+            console.warn("[ChildTasksService] No usable parent work item in context:", parentRef.error)
+            return ChildTasksService.createResult({ errorMessage: parentRef.error })
         }
 
-        const projectId = context.currentProjectGuid
-        const workItemId = context.workItemId
+        // Board, backlog and query menus do not pass the project: use the page's.
+        const projectId = parentRef.projectId ?? SDK.getWebContext()?.project?.id
+        if (!projectId) {
+            return ChildTasksService.createResult({
+                errorMessage: "The current project could not be determined.",
+            })
+        }
+        const workItemId = parentRef.workItemId
         const results: ChildTaskExecutionItem[] = []
 
         let parent: WorkItem

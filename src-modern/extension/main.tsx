@@ -47,11 +47,6 @@ async function init() {
           await dialogService.openCustomDialog(chooseContributionId, {
             title: 'Add Child Tasks',
             configuration: context,
-            resizable: true,
-            modal: true,
-            // Large enough to list a project's templates without scrolling.
-            width: 720,
-            height: 640,
           });
 
           console.log('[Extension] Dialog opened successfully');

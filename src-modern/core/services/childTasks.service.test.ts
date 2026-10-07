@@ -359,4 +359,29 @@ describe('ChildTasksService', () => {
     expect(fieldOperations(patch, 'System.AssignedTo')).toHaveLength(0);
     expect(fieldOperations(patch, 'System.Description')[0].value).toBe('Owner: ');
   });
+  it('creates children from a board card context without a project id', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(mockParentFetch({ 'System.Title': 'Parent' }))
+      .mockResolvedValueOnce(mockCreateFetch(205));
+
+    vi.stubGlobal('fetch', fetchMock);
+    vi.mocked(SDK.getWebContext).mockReturnValue({
+      project: { id: 'web-context-project', name: 'Test' },
+    } as never);
+
+    const service = new ChildTasksService([
+      {
+        name: 'Template A',
+        tasks: [{ name: 'Task 1', workItemType: 'Task', fields: [] }],
+      },
+    ]);
+
+    const result = await service.execute({ id: 10, ids: [10], workItemIds: [10] });
+
+    expect(result.status).toBe('success');
+    expect(fetchMock.mock.calls[0][0]).toBe(
+      'https://dev.azure.com/test-org/web-context-project/_apis/wit/workitems/10?api-version=7.1'
+    );
+  });
 });
