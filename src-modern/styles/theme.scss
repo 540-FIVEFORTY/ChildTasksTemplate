@@ -3,6 +3,9 @@
 // SDK.init({ applyTheme: true }) only defines the theme CSS variables: the
 // page itself must use them, otherwise the browser defaults apply (serif
 // font, black text), which is unreadable in the dark theme.
+//
+// No background: the host already paints the hub, panel or dialog behind
+// the frame, each with its own shade, and the page must match it.
 
 body {
   margin: 0;
@@ -11,7 +14,6 @@ body {
     'Segoe UI Symbol';
   font-size: 0.875rem;
   color: var(--text-primary-color, rgba(0, 0, 0, 0.9));
-  background-color: var(--background-color, #fff);
 }
 
 // Form controls do not inherit text styles by default.

@@ -192,11 +192,6 @@ export function TemplateEditor({
 
   return (
     <div className="template-editor">
-      <div className="template-editor__header">
-        <h2>Child Tasks Template Configuration</h2>
-        <p>Create and manage templates for child tasks.</p>
-      </div>
-
       {hasErrors && (
         <MessageBar severity={MessageBarSeverity.Error}>
           Please fix the validation errors before saving.
