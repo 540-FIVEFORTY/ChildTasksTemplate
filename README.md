@@ -400,7 +400,7 @@ Issues and pull requests are welcome. Please run `npm run lint`, `npm run type-c
 
 ## Support and license
 
-- **Questions and bugs:** [GitHub Issues](https://github.com/dbru540/ChildTasksTemplate/issues)
+- **Questions and bugs:** [GitHub Issues](https://github.com/540-FIVEFORTY/ChildTasksTemplate/issues)
 - **Email:** [dbru@fiveforty.fr](mailto:dbru@fiveforty.fr)
 - **License:** [Apache 2.0](LICENSE)
 

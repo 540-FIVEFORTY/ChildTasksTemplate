@@ -88,19 +88,19 @@
 			"uri": "mailto:dbru@fiveforty.fr"
 		},
 		"home": {
-			"uri": "https://github.com/dbru540/ChildTasksTemplate"
+			"uri": "https://github.com/540-FIVEFORTY/ChildTasksTemplate"
 		},
 		"getstarted": {
-			"uri": "https://github.com/dbru540/ChildTasksTemplate"
+			"uri": "https://github.com/540-FIVEFORTY/ChildTasksTemplate"
 		},
 		"learn": {
-			"uri": "https://github.com/dbru540/ChildTasksTemplate"
+			"uri": "https://github.com/540-FIVEFORTY/ChildTasksTemplate"
 		},
 		"repository": {
-			"uri": "https://github.com/dbru540/ChildTasksTemplate"
+			"uri": "https://github.com/540-FIVEFORTY/ChildTasksTemplate"
 		},
 		"issues": {
-			"uri": "https://github.com/dbru540/ChildTasksTemplate/issues"
+			"uri": "https://github.com/540-FIVEFORTY/ChildTasksTemplate/issues"
 		}
 	},
 	"tags": [
@@ -114,7 +114,7 @@
 	],
 	"repository": {
 		"type": "git",
-		"uri": "https://github.com/dbru540/ChildTasksTemplate.git"
+		"uri": "https://github.com/540-FIVEFORTY/ChildTasksTemplate.git"
 	},
 	"screenshots": [
 		{

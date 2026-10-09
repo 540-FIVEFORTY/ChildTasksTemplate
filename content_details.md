@@ -2,7 +2,7 @@
 
 Stop re-typing the same tasks on every user story. Define reusable templates of child work items for your project, then create them under any parent work item in one click — already linked to the parent, titled, estimated and placed in the right area and iteration.
 
-![Add tasks from the work item menu](https://raw.githubusercontent.com/dbru540/ChildTasksTemplate/main/doc/add_child_tasks_screen.png)
+![Add tasks from the work item menu](https://raw.githubusercontent.com/540-FIVEFORTY/ChildTasksTemplate/main/doc/add_child_tasks_screen.png)
 
 ## What you get
 
@@ -43,7 +43,7 @@ Click **Save** when you are done. Templates are stored per project.
 
 Open a parent work item — or right-click it on a board, backlog or query — and choose **Add tasks** from the `⋯` menu.
 
-![Add tasks menu entry](https://raw.githubusercontent.com/dbru540/ChildTasksTemplate/main/doc/Add_tasks.png)
+![Add tasks menu entry](https://raw.githubusercontent.com/540-FIVEFORTY/ChildTasksTemplate/main/doc/Add_tasks.png)
 
 Select one or more templates — or type part of a name in the search box to find it — and confirm. The child work items are created with a **Parent** link to the work item you started from.
 
@@ -84,7 +84,7 @@ Example of a template in JSON:
 }
 ```
 
-More examples (Scrum, bug fix, Agile) and the full template reference are in the [documentation on GitHub](https://github.com/dbru540/ChildTasksTemplate#template-reference).
+More examples (Scrum, bug fix, Agile) and the full template reference are in the [documentation on GitHub](https://github.com/540-FIVEFORTY/ChildTasksTemplate#template-reference).
 
 ## Permissions and privacy
 
@@ -92,4 +92,4 @@ The extension requests **Work items (read and write)** so that it can read the p
 
 ## Support
 
-Found a bug or have an idea? [Open an issue on GitHub](https://github.com/dbru540/ChildTasksTemplate/issues) or email [dbru@fiveforty.fr](mailto:dbru@fiveforty.fr).
+Found a bug or have an idea? [Open an issue on GitHub](https://github.com/540-FIVEFORTY/ChildTasksTemplate/issues) or email [dbru@fiveforty.fr](mailto:dbru@fiveforty.fr).
