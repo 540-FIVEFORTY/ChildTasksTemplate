@@ -9,7 +9,10 @@ Stop re-typing the same tasks on every user story. **Child Tasks Template** lets
 
 **[Install from the Visual Studio Marketplace →](https://marketplace.visualstudio.com/items?itemName=Fiveforty.ChildTasksTemplate)**
 
-![Add tasks from the work item menu](doc/add_child_tasks_screen.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="doc/children-created-dark.png">
+  <img alt="Child tasks created from a template and linked to the user story" src="doc/children-created-light.png">
+</picture>
 
 ---
 
@@ -67,14 +70,34 @@ In the visual editor you can:
 
 In JSON mode, **Copy JSON** puts the whole configuration on your clipboard — handy to copy templates from one project to another — and **Format** re-indents it.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="doc/settings-editor-dark.png">
+  <img alt="Visual template editor with drop-down values and expected formats" src="doc/settings-editor-light.png">
+</picture>
+
+Field names are suggested from the project's process as you type:
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="doc/settings-suggestions-dark.png">
+  <img alt="Field name suggestions" src="doc/settings-suggestions-light.png">
+</picture>
+
 ### 3. Create child tasks
 
 1. Open a parent work item (for example a User Story, a Product Backlog Item or a Bug), or right-click it on a board, backlog or query result.
 2. Choose **Add tasks** from the `⋯` menu.
 
-   ![Add tasks menu entry](doc/Add_tasks.png)
+   <picture>
+     <source media="(prefers-color-scheme: dark)" srcset="doc/menu-add-tasks-dark.png">
+     <img alt="Add tasks in the work item menu" src="doc/menu-add-tasks-light.png">
+   </picture>
 
 3. Select one or more templates and confirm. With many templates, type in the **Search templates** box: matching names appear in a drop-down list (case and accents are ignored) and the list below is filtered. Press **Enter** or click a name to select it.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="doc/picker-search-dark.png">
+  <img alt="Template picker side panel with search suggestions" src="doc/picker-search-light.png">
+</picture>
 
 The child work items are created with a **Parent** link to the work item you started from. A summary shows the created items and any that failed.
 

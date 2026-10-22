@@ -230,22 +230,25 @@ export function TemplateSelectorPanel() {
             severity={resultSeverity(submissionResult)}
             className="template-selector-panel__result"
           >
-            <div>{resultSummary(submissionResult)}</div>
-            {submissionResult.createdWorkItemIds.length > 0 && (
-              <div className="template-selector-panel__result-detail">
-                Created work item IDs: {submissionResult.createdWorkItemIds.join(', ')}
-              </div>
-            )}
-            {failedItems && failedItems.length > 0 && (
-              <ul className="template-selector-panel__result-list">
-                {failedItems.map((item, index) => (
-                  <li key={`${item.templateName}-${item.taskName}-${index}`}>
-                    {item.templateName} / {item.taskName} ({item.workItemType}):{' '}
-                    {item.errorMessage}
-                  </li>
-                ))}
-              </ul>
-            )}
+            {/* The message area is a wrapping flex row: keep the lines stacked. */}
+            <div className="template-selector-panel__result-body">
+              <div>{resultSummary(submissionResult)}</div>
+              {submissionResult.createdWorkItemIds.length > 0 && (
+                <div className="template-selector-panel__result-detail">
+                  Created work item IDs: {submissionResult.createdWorkItemIds.join(', ')}
+                </div>
+              )}
+              {failedItems && failedItems.length > 0 && (
+                <ul className="template-selector-panel__result-list">
+                  {failedItems.map((item, index) => (
+                    <li key={`${item.templateName}-${item.taskName}-${index}`}>
+                      {item.templateName} / {item.taskName} ({item.workItemType}):{' '}
+                      {item.errorMessage}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </MessageBar>
         )}
 

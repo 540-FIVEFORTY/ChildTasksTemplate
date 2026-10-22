@@ -297,10 +297,11 @@
     left: 0;
     min-width: var(--field-name-suggestions-width, 64ch);
     max-width: min(calc(100vw - 80px), 112ch);
-    background: var(--background-color, #fff);
-    border: 1px solid var(--palette-neutral-20, #e0e0e0);
+    // Floating menu colors from the theme, so the list stands out in dark mode.
+    background: var(--callout-background-color, #fff);
+    border: 1px solid rgba(var(--palette-neutral-8, 214, 214, 214), 1);
     border-radius: 4px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
     z-index: 1000;
     max-height: clamp(280px, calc(100vh - 220px), 520px);
     overflow-y: auto;

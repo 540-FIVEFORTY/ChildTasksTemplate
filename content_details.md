@@ -2,11 +2,11 @@
 
 Stop re-typing the same tasks on every user story. Define reusable templates of child work items for your project, then create them under any parent work item in one click — already linked to the parent, titled, estimated and placed in the right area and iteration.
 
-![Add tasks from the work item menu](https://raw.githubusercontent.com/540-FIVEFORTY/ChildTasksTemplate/main/doc/add_child_tasks_screen.png)
+![Child tasks created from a template and linked to the user story](https://raw.githubusercontent.com/540-FIVEFORTY/ChildTasksTemplate/main/doc/children-created-light.png)
 
 ## What you get
 
-- **Add tasks** action on the work item form, on board and backlog cards, and in query results.
+- **Add tasks** action on the work item form, on board and backlog cards, and in query results, opening a full-height side panel.
 - **Several templates at once** — select one or more templates and every task they contain is created.
 - **Template search** — type part of a name to find the right template, even in projects with many.
 - **Parent values in children** — reuse the parent's title, ID, area, iteration, assignee or any other field.
@@ -15,6 +15,13 @@ Stop re-typing the same tasks on every user story. Define reusable templates of 
 - **Smart field input** — field names are suggested from your project's process, with hints for drop-down values, dates and decimals.
 - **Validation before save** — invalid fields and values are flagged in the editor instead of failing later.
 - **Clear results** — see what was created and, if something failed, why.
+- **Light and dark themes** — the panel and the settings page follow your Azure DevOps theme.
+
+## What's new in 3.1
+
+- The template picker opens in a full-height side panel again, as in 2.x, with a search box that suggests matching template names.
+- **Add tasks** works from boards, backlogs and query results, not only from the work item form.
+- The settings page and the panel are readable in the dark theme.
 
 ## What's new in 3.0
 
@@ -39,13 +46,31 @@ Go to **Project settings → Extensions → Child Tasks Template**. A sample *De
 
 Click **Save** when you are done. Templates are stored per project.
 
+![Visual template editor with drop-down values and expected formats](https://raw.githubusercontent.com/540-FIVEFORTY/ChildTasksTemplate/main/doc/settings-editor-light.png)
+
+Field names are suggested from your project's process as you type, with a short description of each field:
+
+![Field name suggestions](https://raw.githubusercontent.com/540-FIVEFORTY/ChildTasksTemplate/main/doc/settings-suggestions-light.png)
+
 ## 2. Create the child tasks
 
 Open a parent work item — or right-click it on a board, backlog or query — and choose **Add tasks** from the `⋯` menu.
 
-![Add tasks menu entry](https://raw.githubusercontent.com/540-FIVEFORTY/ChildTasksTemplate/main/doc/Add_tasks.png)
+![Add tasks in the work item menu](https://raw.githubusercontent.com/540-FIVEFORTY/ChildTasksTemplate/main/doc/menu-add-tasks-light.png)
 
-Select one or more templates — or type part of a name in the search box to find it — and confirm. The child work items are created with a **Parent** link to the work item you started from.
+A side panel lists the project's templates. Select one or more — or type part of a name in the search box to find it — and click **Create tasks**.
+
+![Template picker with search suggestions](https://raw.githubusercontent.com/540-FIVEFORTY/ChildTasksTemplate/main/doc/picker-search-light.png)
+
+The child work items are created with a **Parent** link to the work item you started from, and the panel lists the IDs that were created.
+
+## Dark theme
+
+The extension follows the Azure DevOps theme.
+
+![Template picker in the dark theme](https://raw.githubusercontent.com/540-FIVEFORTY/ChildTasksTemplate/main/doc/picker-search-dark.png)
+
+![Template editor in the dark theme](https://raw.githubusercontent.com/540-FIVEFORTY/ChildTasksTemplate/main/doc/settings-editor-dark.png)
 
 ## Reusing parent values
 

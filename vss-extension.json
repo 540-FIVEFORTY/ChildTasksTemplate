@@ -118,7 +118,25 @@
 	},
 	"screenshots": [
 		{
-			"path": "dist/doc/add_child_tasks_screen.png"
+			"path": "dist/doc/children-created-light.png"
+		},
+		{
+			"path": "dist/doc/picker-search-light.png"
+		},
+		{
+			"path": "dist/doc/menu-add-tasks-light.png"
+		},
+		{
+			"path": "dist/doc/settings-editor-light.png"
+		},
+		{
+			"path": "dist/doc/settings-suggestions-light.png"
+		},
+		{
+			"path": "dist/doc/picker-search-dark.png"
+		},
+		{
+			"path": "dist/doc/settings-editor-dark.png"
 		}
 	]
 }
